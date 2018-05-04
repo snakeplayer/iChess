@@ -37,5 +37,13 @@ namespace iChessClient
             Uri iconUri = new Uri(@"C:\Users\Administrateur\Documents\T_DIPL\Documentation\Poster\Logo_iChess.png", UriKind.RelativeOrAbsolute);
             this.Icon = BitmapFrame.Create(iconUri);
         }
+
+        private void btnRegistration_Click(object sender, RoutedEventArgs e)
+        {
+            Window registerWindow = new RegisterWindow();
+            registerWindow.Owner = this;
+            registerWindow.Show();
+            this.Hide();
+        }
     }
 }
