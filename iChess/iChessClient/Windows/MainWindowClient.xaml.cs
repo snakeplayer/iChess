@@ -3,7 +3,7 @@
  * Date: 2018
  * Project: iChessClient
  * Project description: A local network chess game. 
- * File: MainWindowClient
+ * File: MainWindowClient.xaml.cs
  * File description: The login user interface.
  */
 

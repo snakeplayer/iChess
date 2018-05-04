@@ -1,4 +1,13 @@
-﻿using System;
+﻿/*
+ * Author: Benoit CHAUCHE
+ * Date: 2018
+ * Project: iChessClient
+ * Project description: A local network chess game. 
+ * File: RegisterWindowClient.xaml.cs
+ * File description: The register user interface.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
