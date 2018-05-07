@@ -5,15 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iChessClient"
         mc:Ignorable="d"
-        Title="iChess - Register" Height="333" Width="323.75" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner">
+        Title="iChess - Register" Height="333" Width="323.75" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner" Closing="WindowRegister_Closing">
     <Grid Background="#FFE0E0E0">
 
         <Image x:Name="imgLogo" HorizontalAlignment="Left" Height="69" Margin="-2,-1,-78,0" VerticalAlignment="Top" Width="372" Source="/iChessClient;component/Pictures/iChessLogoTall@4x.png"/>
-        <TextBox x:Name="tbxIpAddress" HorizontalAlignment="Left" Height="27" Margin="0,77,0,0" TextWrapping="Wrap" Text="192.168.123.124" VerticalAlignment="Top" Width="192" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}"/>
-        <TextBox x:Name="tbxPort" HorizontalAlignment="Left" Height="27" Margin="197,77,-16,0" TextWrapping="Wrap" Text="424242" VerticalAlignment="Top" Width="111" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}"/>
-        <TextBox x:Name="tbxUsername" HorizontalAlignment="Left" Height="27" Margin="0,108,-16,0" TextWrapping="Wrap" Text="MonNomDutilisateur" VerticalAlignment="Top" Width="308" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}"/>
-        <TextBox x:Name="tbxPassword" HorizontalAlignment="Left" Height="27" Margin="0,139,-16,0" TextWrapping="Wrap" Text="MotDePasse" VerticalAlignment="Top" Width="308" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}"/>
-        <Button x:Name="btnConfirm" Content="Confirmer" HorizontalAlignment="Left" Margin="0,211,0,0" VerticalAlignment="Top" Width="308" Height="44" FontSize="22" Background="#9900EE00" BorderThickness="0">
+        <TextBox x:Name="tbxIpAddress" HorizontalAlignment="Left" Height="27" Margin="0,77,0,0" TextWrapping="Wrap" Text="127.0.0.1" VerticalAlignment="Top" Width="192" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}"/>
+        <TextBox x:Name="tbxPort" HorizontalAlignment="Left" Height="27" Margin="197,77,-16,0" TextWrapping="Wrap" Text="8080" VerticalAlignment="Top" Width="111" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}"/>
+        <TextBox x:Name="tbxUsername" HorizontalAlignment="Left" Height="27" Margin="0,108,-16,0" TextWrapping="Wrap" Text="Username4" VerticalAlignment="Top" Width="308" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}"/>
+        <TextBox x:Name="tbxPassword" HorizontalAlignment="Left" Height="27" Margin="0,139,-16,0" TextWrapping="Wrap" Text="password4" VerticalAlignment="Top" Width="308" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}"/>
+        <TextBox x:Name="tbxPasswordConfirmation" HorizontalAlignment="Left" Height="27" Margin="0,171,0,0" TextWrapping="Wrap" Text="password4" VerticalAlignment="Top" Width="308" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}" />
+        <Button x:Name="btnConfirm" Content="Confirmer" HorizontalAlignment="Left" Margin="0,211,0,0" VerticalAlignment="Top" Width="308" Height="44" FontSize="22" Background="#9900EE00" BorderThickness="0" Click="btnConfirm_Click">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>
@@ -35,7 +36,7 @@
                 </Style>
             </Button.Style>
         </Button>
-        <TextBox x:Name="tbxPassword_Copy" HorizontalAlignment="Left" Height="27" Margin="-2,171,0,0" TextWrapping="Wrap" Text="MotDePasseConf" VerticalAlignment="Top" Width="308" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}" TextChanged="tbxPassword_Copy_TextChanged"/>
+        
 
     </Grid>
 </Window>

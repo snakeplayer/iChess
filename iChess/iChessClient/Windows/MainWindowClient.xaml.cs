@@ -29,6 +29,14 @@ namespace iChessClient
     /// </summary>
     public partial class MainWindow : Window
     {
+        #region Properties
+
+        public ClientConnection MyConnection { get; set; }
+
+        #endregion
+
+        #region Constructors
+
         public MainWindow()
         {
             InitializeComponent();
@@ -36,6 +44,35 @@ namespace iChessClient
             // Custom icon
             Uri iconUri = new Uri(@"C:\Users\Administrateur\Documents\T_DIPL\Documentation\Poster\Logo_iChess.png", UriKind.RelativeOrAbsolute);
             this.Icon = BitmapFrame.Create(iconUri);
+
+            this.MyConnection = new ClientConnection();
+        }
+
+        #endregion
+        
+        #region Methods (Events)
+
+        private void btnConfirm_Click(object sender, RoutedEventArgs e)
+        {
+            int connectionState = this.MyConnection.ConnectToServer(tbxIpAddress.Text, Convert.ToInt32(tbxPort.Text), tbxUsername.Text, tbxPassword.Text);
+
+            switch (connectionState)
+            {
+                case -1:
+                    MessageBox.Show("Une erreur s'est produite lors de la tentative de connexion au server.");
+                    break;
+
+                case 0:
+                    MessageBox.Show("Le serveur a accepté la connexion.");
+                    break;
+
+                case 1:
+                    MessageBox.Show("Le serveur a refusé la connexion.");
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         private void btnRegistration_Click(object sender, RoutedEventArgs e)
@@ -45,5 +82,12 @@ namespace iChessClient
             registerWindow.Show();
             this.Hide();
         }
+
+        private void btnQuit_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        #endregion
     }
 }

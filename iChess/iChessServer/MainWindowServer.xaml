@@ -1,12 +1,21 @@
-﻿<Window x:Class="iChessServer.MainWindow"
+﻿<Window x:Name="WindowServer" x:Class="iChessServer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iChessServer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="iChess - Server" Height="350" Width="616.467">
     <Grid>
-        
+        <GroupBox Header="Logs" HorizontalAlignment="Left" Height="299" Margin="10,10,0,0" VerticalAlignment="Top" Width="413">
+            <TextBox x:Name="tbxLogs" TextWrapping="Wrap" Margin="0,0,0,44"/>
+        </GroupBox>
+        <GroupBox Header="Clients" HorizontalAlignment="Left" Height="299" Margin="428,10,0,0" VerticalAlignment="Top" Width="170">
+            <ListBox x:Name="lbxClients" Margin="0,0,0,45"/>
+        </GroupBox>
+        <Button x:Name="btnStart" Content="Start" HorizontalAlignment="Left" Margin="17,268,0,0" VerticalAlignment="Top" Width="200" Height="33" Click="btnStart_Click"/>
+        <Button x:Name="btnStop" Content="Stop" HorizontalAlignment="Left" Margin="221,268,0,0" VerticalAlignment="Top" Width="195" Height="33" Click="btnStop_Click"/>
+        <Button x:Name="btnKick" Content="Kick" HorizontalAlignment="Left" Margin="435,268,0,0" VerticalAlignment="Top" Width="156" Height="33"/>
+
     </Grid>
 </Window>

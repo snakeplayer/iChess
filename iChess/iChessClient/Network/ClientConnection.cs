@@ -25,6 +25,11 @@ namespace iChessClient
     {
         #region Constants
 
+        // Register
+        private static string PACKET_TYPE_REGISTER_REQUEST = "Client_RegisterRequest";
+        private static string PACKET_TYPE_REGISTER_REPLY = "Server_RegisterReply";
+
+        // Login
         private string PACKET_TYPE_LOGIN_REQUEST = "Client_LoginRequest";
         private string PACKET_TYPE_LOGIN_REPLY = "Server_LoginReply";
 
@@ -49,7 +54,43 @@ namespace iChessClient
 
         #endregion
 
-        #region Methods (Login & logout)
+        #region Methods (Register, login & logout)
+
+        /// <summary>
+        /// Allows to register on an iChess server.
+        /// </summary>
+        /// <param name="ipAddress">The ip address of the server.</param>
+        /// <param name="port">The port of the server.</param>
+        /// <param name="username">The username of the client.</param>
+        /// <param name="password">The password of the client.</param>
+        /// <returns></returns>
+        public static int RegisterToServer(string ipAddress, int port, string username, string password)
+        {
+            // Initializing the return value
+            int registerAllowed = -1;
+
+            try
+            {
+                // Format credentials
+                string credentials = string.Format("{0}:{1}", username, password);
+
+                // Send the connection request and wait 5000ms for a reply
+                if (NetworkComms.SendReceiveObject<string, bool>(PACKET_TYPE_REGISTER_REQUEST, ipAddress, port, PACKET_TYPE_REGISTER_REPLY, 5000, credentials))
+                {
+                    registerAllowed = 0; // The server has accepted the registration
+                }
+                else
+                {
+                    registerAllowed = 1; // The server has refused the registration
+                }
+            }
+            catch (Exception)
+            {
+                registerAllowed = -1; // An error occured
+            }
+
+            return registerAllowed;
+        }
 
         /// <summary>
         /// Establishes a connection with the server.
@@ -81,12 +122,6 @@ namespace iChessClient
                 {
                     // Handle connection shutdown
                     this.MyConnection.AppendShutdownHandler(HandleConnectionClosed);
-
-                    // Handle message from server
-                    //this.MyConnection.AppendIncomingPacketHandler<string>("Message_Server", HandleMessageServerReceived);
-
-                    // Handle message from clients (from the server)
-                    //this.MyConnection.AppendIncomingPacketHandler<string>("Message_Client", HandleMessageClientReceived);
                 }
 
                 // Format credentials
@@ -99,7 +134,7 @@ namespace iChessClient
                 }
                 else
                 {
-                    connectionAllowed = 1; // The server refused the connection.
+                    connectionAllowed = 1; // The server refused the connection
                 }
             }
             catch (Exception)

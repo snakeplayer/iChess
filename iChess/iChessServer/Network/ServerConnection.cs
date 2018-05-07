@@ -11,10 +11,12 @@ using NetworkCommsDotNet;
 using NetworkCommsDotNet.Connections;
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace iChessServer
 {
@@ -25,16 +27,51 @@ namespace iChessServer
     {
         #region Constants
 
+        // Register
+        private string PACKET_TYPE_REGISTER_REQUEST = "Client_RegisterRequest";
+        private string PACKET_TYPE_REGISTER_REPLY = "Server_RegisterReply";
+
+        // Login
         private string PACKET_TYPE_LOGIN_REQUEST = "Client_LoginRequest";
         private string PACKET_TYPE_LOGIN_REPLY = "Server_LoginReply";
 
         #endregion
 
+        #region Fields
+
+        private string _logs;
+        private Dictionary<Connection, string> _authenticatedClients;
+
+        #endregion
+
         #region Properties
 
-        private Dictionary<string, string> DBClients { get; set; } // Fake DB
-        private Dictionary<Connection, string> AuthenticatedClients { get; set; }
-        public string Logs { get; set; }
+        private List<IObserverWindow> Observers { get; set; }
+
+        private Dictionary<string, string> DBClients {
+            get {
+                return ServerDatabase.GetClientsFromDB();
+            }
+        }
+        private Dictionary<Connection, string> AuthenticatedClients {
+            get {
+                return _authenticatedClients;
+            }
+            set {
+                _authenticatedClients = value;
+                this.NotifyObservers();
+            }
+        }
+
+        private string Logs {
+            get {
+                return _logs;
+            }
+            set {
+                _logs = value;
+                this.NotifyObservers();
+            }
+        }
 
         #endregion
 
@@ -45,14 +82,9 @@ namespace iChessServer
         /// </summary>
         public ServerConnection()
         {
-            // Fake DB
-            this.DBClients = new Dictionary<string, string>();
-            this.DBClients.Add("Username1", "password1");
-            this.DBClients.Add("Username2", "password2");
-            this.DBClients.Add("Username3", "password3");
-
+            // Initialization
+            this.Observers = new List<IObserverWindow>();
             this.AuthenticatedClients = new Dictionary<Connection, string>();
-
             this.Logs = string.Empty;
 
             try
@@ -60,11 +92,11 @@ namespace iChessServer
                 // Handle connections closing
                 NetworkComms.AppendGlobalConnectionCloseHandler(HandleConnectionClosed);
 
-                // Handle "Login_Request" packet type for login request
-                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_LOGIN_REQUEST, LoginRequested);
+                // Handle "RegisterRequest" packet type for register request
+                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_REGISTER_REQUEST, RegisterRequested);
 
-                // Handle "Message_Client" packet type for message recieved
-                //NetworkComms.AppendGlobalIncomingPacketHandler<string>("Message_Client", MessageRecieved);
+                // Handle "Client_LoginRequest" packet type for login request
+                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_LOGIN_REQUEST, LoginRequested);
             }
             catch (Exception e)
             {
@@ -74,7 +106,84 @@ namespace iChessServer
 
         #endregion
 
-        #region Methods
+        #region Methods (Tell, Don't Ask)
+
+        /// <summary>
+        /// Retrieve the list of authenticated clients.
+        /// </summary>
+        /// <returns>A list of string conatining authenticated clients.</returns>
+        public List<string> GetAuthenticatedClients()
+        {
+            List<string> clients = new List<string>();
+            lock (this.AuthenticatedClients)
+            {
+                this.AuthenticatedClients.ToList().ForEach(authClient => clients.Add(authClient.Value));
+            }
+            return clients;
+        }
+
+        /// <summary>
+        /// Retrieve the logs.
+        /// </summary>
+        /// <returns>The logs of the server.</returns>
+        public string GetLogs()
+        {
+            return this.Logs;
+        }
+
+        #endregion
+
+        #region Methods (Database)
+
+        /// <summary>
+        /// Allows a client to register.
+        /// </summary>
+        /// <param name="username">The username of the client.</param>
+        /// <param name="password">The password of the client.</param>
+        /// <returns>True if the client registered successfully, false if not.</returns>
+        public bool RegisterClient(string username, string password)
+        {
+            return ServerDatabase.RegisterClient(username, password);
+        }
+
+        #endregion
+
+        #region Methods (Observers)
+
+        /// <summary>
+        /// Add an IObserverWindow to the list.
+        /// </summary>
+        /// <param name="observerWindow">The IObserverWindow to add.</param>
+        public void RegisterObserver(IObserverWindow observerWindow)
+        {
+            this.Observers.Add(observerWindow);
+            this.NotifyObservers();
+        }
+
+        /// <summary>
+        /// Remove an IObserverWindow from the list.
+        /// </summary>
+        /// <param name="observerWindow">The IObserverWindow to remove.</param>
+        public void UnregisterObserver(IObserverWindow observerWindow)
+        {
+            this.Observers.Add(observerWindow);
+            this.NotifyObservers();
+        }
+
+        /// <summary>
+        /// Notify all registered IObserverWindow.
+        /// </summary>
+        public void NotifyObservers()
+        {
+            lock (this.Observers)
+            {
+                this.Observers.ToList().ForEach(obs => obs.UpdateView());
+            }
+        }
+
+        #endregion
+
+        #region Methods (Start and Stop)
 
         /// <summary>
         /// Starts the server.
@@ -105,6 +214,8 @@ namespace iChessServer
                 }
             }
 
+            this.NotifyObservers();
+
             return hasServerStarted;
         }
 
@@ -114,20 +225,49 @@ namespace iChessServer
         public void StopServer()
         {
             NetworkComms.Shutdown();
-            lock (this.AuthenticatedClients)
-            {
-                this.AuthenticatedClients.Clear();
-            }
 
             lock (this.Logs)
             {
                 this.Logs += "Server disconnected.\n";
             }
+
+            lock (this.AuthenticatedClients)
+            {
+                this.AuthenticatedClients.Clear();
+            }
+
+            this.NotifyObservers();
         }
 
         #endregion
 
         #region Methods (Handler)
+
+        /// <summary>
+        /// Called when a registration request is made.
+        /// </summary>
+        /// <param name="packetHeader">The packet header.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="credentials">The credentials.</param>
+        private void RegisterRequested(PacketHeader packetHeader, Connection connection, string credentials)
+        {
+            // Parse the necessary information out of the provided string
+            string username = credentials.Split(':').First();
+            string password = credentials.Split(':').Last();
+
+            if (this.RegisterClient(username, password))
+            {
+                // Send a positive reply to the client
+                connection.SendObject<bool>(PACKET_TYPE_REGISTER_REPLY, true);
+            }
+            else
+            {
+                // Send a negative reply to the client
+                connection.SendObject<bool>(PACKET_TYPE_REGISTER_REPLY, false);
+            }
+
+            this.NotifyObservers();
+        }
 
         /// <summary>
         /// Called when a connection request is made.
@@ -149,33 +289,26 @@ namespace iChessServer
                     this.AuthenticatedClients.Remove(connection);
                 }
 
-                // If the client's account is already used
-                if (this.AuthenticatedClients.ContainsValue(username))
+                // If the client's account is not already used and if credentials are correct
+                if (!this.AuthenticatedClients.ContainsValue(username) && (this.DBClients.ContainsKey(username) && this.DBClients[username] == password))
                 {
+                    // Add the client to the list
+                    this.AuthenticatedClients.Add(connection, username);
+
                     // Send a reply to the client
-                    connection.SendObject<bool>("Login_Reply", false);
+                    connection.SendObject<bool>(PACKET_TYPE_LOGIN_REPLY, true);
+
+                    // Add a message to logs
+                    this.Logs += string.Format("{0} is now connected !\n", this.AuthenticatedClients[connection]);
                 }
                 else
                 {
-                    // If the credentials are correct
-                    if (this.DBClients.ContainsKey(username) && this.DBClients[username] == password)
-                    {
-                        // Add the client to the list
-                        this.AuthenticatedClients.Add(connection, username);
-
-                        // Send a reply to the client
-                        connection.SendObject<bool>("Login_Reply", true);
-
-                        // Show message
-                        this.Logs += string.Format("{0} is now connected !\n", this.AuthenticatedClients[connection]);
-                    }
-                    else
-                    {
-                        // Send a reply
-                        connection.SendObject<bool>("Login_Reply", false);
-                    }
+                    // Send a reply to the client
+                    connection.SendObject<bool>(PACKET_TYPE_LOGIN_REPLY, false);
                 }
             }
+
+            this.NotifyObservers();
         }
 
         /// <summary>
@@ -197,6 +330,8 @@ namespace iChessServer
                     this.AuthenticatedClients.Remove(connection);
                 }
             }
+
+            this.NotifyObservers();
         }
 
         #endregion
