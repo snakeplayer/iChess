@@ -79,6 +79,6 @@ namespace iChessServer
             this.MyServer.StopServer();
         }
 
-        #endregion        
+        #endregion
     }
 }

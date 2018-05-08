@@ -64,6 +64,10 @@ namespace iChessClient
 
                 case 0:
                     MessageBox.Show("Le serveur a accepté la connexion.");
+                    MainMenuClient mainMenu = new MainMenuClient(this.MyConnection);
+                    mainMenu.Owner = this;
+                    mainMenu.Show();
+                    this.Hide();
                     break;
 
                 case 1:

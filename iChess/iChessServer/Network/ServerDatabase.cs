@@ -45,7 +45,7 @@ namespace iChessServer
             connection.Open();
 
             // Querry
-            string sql = string.Format("INSERT INTO Clients(username, password) VALUES('{0}','{1}')", username, password);
+            string sql = string.Format("INSERT INTO Clients(username, password, registrationDate) VALUES('{0}','{1}', '{2}')", username, password, DateTimeOffset.Now.ToUnixTimeSeconds());
             SQLiteCommand command = new SQLiteCommand(sql, connection);
             try
             {

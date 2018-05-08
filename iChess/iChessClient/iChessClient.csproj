@@ -58,9 +58,16 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Network\ClientConnection.cs" />
+    <Compile Include="Windows\MainMenuClient.xaml.cs">
+      <DependentUpon>MainMenuClient.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\RegisterWindowClient.xaml.cs">
       <DependentUpon>RegisterWindowClient.xaml</DependentUpon>
     </Compile>
+    <Page Include="Windows\MainMenuClient.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\MainWindowClient.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -108,5 +115,6 @@
   <ItemGroup>
     <Resource Include="Pictures\iChessLogoTall%404x.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
