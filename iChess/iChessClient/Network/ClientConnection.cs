@@ -25,6 +25,8 @@ namespace iChessClient
     {
         #region Constants
 
+        private string DEFAULT_USERNAME = "NO_USERNAME";
+
         // Register
         private static string PACKET_TYPE_REGISTER_REQUEST = "Client_RegisterRequest";
         private static string PACKET_TYPE_REGISTER_REPLY = "Server_RegisterReply";
@@ -33,11 +35,20 @@ namespace iChessClient
         private string PACKET_TYPE_LOGIN_REQUEST = "Client_LoginRequest";
         private string PACKET_TYPE_LOGIN_REPLY = "Server_LoginReply";
 
+        // EloRating recovering
+        private static string PACKET_TYPE_ELORATING_REQUEST = "Client_EloRatingRequest";
+        private static string PACKET_TYPE_ELORATING_REPLY = "Client_EloRatingReply";
+
         #endregion
 
         #region Properties
 
         private Connection MyConnection { get; set; }
+
+        private string Username { get; set; }
+        private string ServerIP { get; set; }
+        private int ServerPort { get; set; }
+
         private bool FirstInitialization { get; set; }
 
         #endregion
@@ -49,12 +60,32 @@ namespace iChessClient
         /// </summary>
         public ClientConnection()
         {
+            this.Username = DEFAULT_USERNAME;
             this.FirstInitialization = true;
         }
 
         #endregion
 
-        #region Methods (Register, login & logout)
+        #region Methods (Tell, Don't Ask)
+
+        public string GetUsername()
+        {
+            return this.Username;
+        }
+
+        public string GetServerIP()
+        {
+            return this.ServerIP;
+        }
+
+        public int GetServerPort()
+        {
+            return this.ServerPort;
+        }
+
+        #endregion
+
+        #region Methods (Database)
 
         /// <summary>
         /// Allows to register on an iChess server.
@@ -74,7 +105,7 @@ namespace iChessClient
                 // Format credentials
                 string credentials = string.Format("{0}:{1}", username, password);
 
-                // Send the connection request and wait 5000ms for a reply
+                // Send the registration request and wait 5000ms for a reply
                 if (NetworkComms.SendReceiveObject<string, bool>(PACKET_TYPE_REGISTER_REQUEST, ipAddress, port, PACKET_TYPE_REGISTER_REPLY, 5000, credentials))
                 {
                     registerAllowed = 0; // The server has accepted the registration
@@ -91,6 +122,28 @@ namespace iChessClient
 
             return registerAllowed;
         }
+
+        public static int GetEloRating(string ipAddress, int port, string username)
+        {
+            // Initializing the return value
+            int returnValue = -1;
+
+            try
+            {
+                // Send the EloRating request and wait 5000ms for a reply
+                returnValue = NetworkComms.SendReceiveObject<string, int>(PACKET_TYPE_ELORATING_REQUEST, ipAddress, port, PACKET_TYPE_ELORATING_REPLY, 5000, username);
+            }
+            catch (Exception)
+            {
+                returnValue = -1; // An error occured
+            }
+
+            return returnValue;
+        }
+
+        #endregion
+
+        #region Methods (Login & logout)
 
         /// <summary>
         /// Establishes a connection with the server.
@@ -131,6 +184,9 @@ namespace iChessClient
                 if (this.MyConnection.SendReceiveObject<string, bool>(PACKET_TYPE_LOGIN_REQUEST, PACKET_TYPE_LOGIN_REPLY, 5000, credentials))
                 {
                     connectionAllowed = 0; // The server has accepted the connection
+                    this.Username = username;
+                    this.ServerIP = ipAddress;
+                    this.ServerPort = port;
                 }
                 else
                 {
@@ -139,7 +195,7 @@ namespace iChessClient
             }
             catch (Exception)
             {
-                connectionAllowed = -1;
+                connectionAllowed = -1; // An error occured
             }
 
             return connectionAllowed;

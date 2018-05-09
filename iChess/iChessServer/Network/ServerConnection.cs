@@ -35,6 +35,10 @@ namespace iChessServer
         private string PACKET_TYPE_LOGIN_REQUEST = "Client_LoginRequest";
         private string PACKET_TYPE_LOGIN_REPLY = "Server_LoginReply";
 
+        // EloRating recovering
+        private static string PACKET_TYPE_ELORATING_REQUEST = "Client_EloRatingRequest";
+        private static string PACKET_TYPE_ELORATING_REPLY = "Client_EloRatingReply";
+
         #endregion
 
         #region Fields
@@ -97,6 +101,9 @@ namespace iChessServer
 
                 // Handle "Client_LoginRequest" packet type for login request
                 NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_LOGIN_REQUEST, LoginRequested);
+
+                // Handle "Client_EloRatingRequest" packet type for EloRating request
+                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_ELORATING_REQUEST, EloRatingRequested);
             }
             catch (Exception e)
             {
@@ -144,6 +151,11 @@ namespace iChessServer
         public bool RegisterClient(string username, string password)
         {
             return ServerDatabase.RegisterClient(username, password);
+        }
+
+        public int GetEloRating(string username)
+        {
+            return ServerDatabase.GetEloRating(username);
         }
 
         #endregion
@@ -307,6 +319,17 @@ namespace iChessServer
                     connection.SendObject<bool>(PACKET_TYPE_LOGIN_REPLY, false);
                 }
             }
+
+            this.NotifyObservers();
+        }
+
+        private void EloRatingRequested(PacketHeader packetHeader, Connection connection, string username)
+        {
+            // EloRating recovery from database
+            int eloRating = this.GetEloRating(username);
+
+            // Send a reply to the client
+            connection.SendObject<int>(PACKET_TYPE_ELORATING_REPLY, eloRating);
 
             this.NotifyObservers();
         }

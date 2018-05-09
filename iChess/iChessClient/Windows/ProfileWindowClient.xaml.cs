@@ -3,12 +3,10 @@
  * Date: 2018
  * Project: iChessClient
  * Project description: A local network chess game. 
- * File: MainMenuClient.xaml.cs
- * File description: The main menu user interface.
+ * File: ProfilWindowClient.xaml.cs
+ * File description: The profil user interface.
  */
 
-using NetworkCommsDotNet;
-using NetworkCommsDotNet.Connections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,9 +24,9 @@ using System.Windows.Shapes;
 namespace iChessClient
 {
     /// <summary>
-    /// Logique d'interaction pour MainMenuClient.xaml
+    /// Logique d'interaction pour ProfileWindowClient.xaml
     /// </summary>
-    public partial class MainMenuClient : Window
+    public partial class ProfileWindowClient : Window
     {
         #region Properties
 
@@ -42,7 +40,7 @@ namespace iChessClient
         /// Constructor of MainMenuClient.
         /// </summary>
         /// <param name="myConnection">The connection.</param>
-        public MainMenuClient(ClientConnection myConnection)
+        public ProfileWindowClient(ClientConnection myConnection)
         {
             InitializeComponent();
 
@@ -61,10 +59,7 @@ namespace iChessClient
 
         public void UpdateView()
         {
-            int eloRating = ClientConnection.GetEloRating(this.MyConnection.GetServerIP(), this.MyConnection.GetServerPort(), this.MyConnection.GetUsername());
 
-            this.lblUsername.Content = this.MyConnection.GetUsername();
-            this.lblEloRating.Content = string.Format("EloRating : {0}", eloRating);
         }
 
         #endregion
@@ -78,15 +73,7 @@ namespace iChessClient
             this.Owner.Show();
         }
 
-        private void lblUsername_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            ProfileWindowClient profileWindow = new ProfileWindowClient(this.MyConnection);
-            profileWindow.Owner = this;
-            this.Hide();
-            profileWindow.Show();
-        }
-
-        private void WindowMainMenu_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void WindowProfile_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this.MyConnection.DisconnectFromServer();
             this.Owner.Close();

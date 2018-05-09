@@ -63,11 +63,10 @@ namespace iChessClient
                     break;
 
                 case 0:
-                    MessageBox.Show("Le serveur a accepté la connexion.");
                     MainMenuClient mainMenu = new MainMenuClient(this.MyConnection);
                     mainMenu.Owner = this;
-                    mainMenu.Show();
                     this.Hide();
+                    mainMenu.Show();
                     break;
 
                 case 1:
@@ -83,8 +82,8 @@ namespace iChessClient
         {
             Window registerWindow = new RegisterWindow();
             registerWindow.Owner = this;
-            registerWindow.Show();
             this.Hide();
+            registerWindow.Show();
         }
 
         private void btnQuit_Click(object sender, RoutedEventArgs e)

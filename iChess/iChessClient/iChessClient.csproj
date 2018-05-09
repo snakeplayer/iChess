@@ -61,6 +61,9 @@
     <Compile Include="Windows\MainMenuClient.xaml.cs">
       <DependentUpon>MainMenuClient.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\ProfileWindowClient.xaml.cs">
+      <DependentUpon>ProfileWindowClient.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\RegisterWindowClient.xaml.cs">
       <DependentUpon>RegisterWindowClient.xaml</DependentUpon>
     </Compile>
@@ -80,6 +83,10 @@
       <DependentUpon>MainWindowClient.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Windows\ProfileWindowClient.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\RegisterWindowClient.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -115,6 +122,11 @@
   <ItemGroup>
     <Resource Include="Pictures\iChessLogoTall%404x.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Pictures\mono-logout.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Pictures\return.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
