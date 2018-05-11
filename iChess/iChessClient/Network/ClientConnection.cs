@@ -8,6 +8,7 @@
  */
 
 using NetworkCommsDotNet;
+using NetworkCommsDotNet.DPSBase;
 using NetworkCommsDotNet.Connections;
 using NetworkCommsDotNet.Connections.TCP;
 using System;
@@ -35,6 +36,10 @@ namespace iChessClient
         private string PACKET_TYPE_LOGIN_REQUEST = "Client_LoginRequest";
         private string PACKET_TYPE_LOGIN_REPLY = "Server_LoginReply";
 
+        // ClientDetails recovering
+        private static string PACKET_TYPE_CLIENTDETAILS_REQUEST = "Client_ClientDetailsRequest";
+        private static string PACKET_TYPE_CLIENTDETAILS_REPLY = "Server_ClientDetailsReply";
+
         // EloRating recovering
         private static string PACKET_TYPE_ELORATING_REQUEST = "Client_EloRatingRequest";
         private static string PACKET_TYPE_ELORATING_REPLY = "Client_EloRatingReply";
@@ -49,6 +54,21 @@ namespace iChessClient
         private string ServerIP { get; set; }
         private int ServerPort { get; set; }
 
+        public ClientDetails Details
+        {
+            get
+            {
+                if (this.ServerIP != string.Empty && this.ServerPort != -1)
+                {
+                    return ClientConnection.GetClientDetails(this.GetServerIP(), this.GetServerPort(), this.GetUsername());
+                }
+                else
+                {
+                    return new ClientDetails();
+                }
+            }
+        }
+
         private bool FirstInitialization { get; set; }
 
         #endregion
@@ -61,6 +81,8 @@ namespace iChessClient
         public ClientConnection()
         {
             this.Username = DEFAULT_USERNAME;
+            this.ServerIP = string.Empty;
+            this.ServerPort = -1;
             this.FirstInitialization = true;
         }
 
@@ -139,6 +161,19 @@ namespace iChessClient
             }
 
             return returnValue;
+        }
+
+        public static ClientDetails GetClientDetails(string ipAddress, int port, string username)
+        {
+            try
+            {
+                ClientDetails clientDetails = NetworkComms.SendReceiveObject<string, ClientDetails>(PACKET_TYPE_CLIENTDETAILS_REQUEST, ipAddress, port, PACKET_TYPE_CLIENTDETAILS_REPLY, 5000, username);
+                return clientDetails;
+            }
+            catch (Exception)
+            {
+                throw new Exception("An error occured while trying to recover client's details.");
+            }
         }
 
         #endregion

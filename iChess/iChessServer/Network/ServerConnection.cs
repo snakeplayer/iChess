@@ -9,6 +9,7 @@
 
 using NetworkCommsDotNet;
 using NetworkCommsDotNet.Connections;
+using NetworkCommsDotNet.DPSBase;
 using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
@@ -34,6 +35,10 @@ namespace iChessServer
         // Login
         private string PACKET_TYPE_LOGIN_REQUEST = "Client_LoginRequest";
         private string PACKET_TYPE_LOGIN_REPLY = "Server_LoginReply";
+
+        // ClientDetails recovering
+        private static string PACKET_TYPE_CLIENTDETAILS_REQUEST = "Client_ClientDetailsRequest";
+        private static string PACKET_TYPE_CLIENTDETAILS_REPLY = "Server_ClientDetailsReply";
 
         // EloRating recovering
         private static string PACKET_TYPE_ELORATING_REQUEST = "Client_EloRatingRequest";
@@ -102,6 +107,9 @@ namespace iChessServer
                 // Handle "Client_LoginRequest" packet type for login request
                 NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_LOGIN_REQUEST, LoginRequested);
 
+                // Handle ClientDetails request
+                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_CLIENTDETAILS_REQUEST, ClientDetailsRequested);
+
                 // Handle "Client_EloRatingRequest" packet type for EloRating request
                 NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_ELORATING_REQUEST, EloRatingRequested);
             }
@@ -151,6 +159,11 @@ namespace iChessServer
         public bool RegisterClient(string username, string password)
         {
             return ServerDatabase.RegisterClient(username, password);
+        }
+
+        public ClientDetails GetClientDetails(string username)
+        {
+            return ServerDatabase.GetClientDetails(username);
         }
 
         public int GetEloRating(string username)
@@ -319,6 +332,17 @@ namespace iChessServer
                     connection.SendObject<bool>(PACKET_TYPE_LOGIN_REPLY, false);
                 }
             }
+
+            this.NotifyObservers();
+        }
+
+        private void ClientDetailsRequested(PacketHeader packetHeader, Connection connection, string username)
+        {
+            // ClientDetails recovering from database
+            ClientDetails clientDetails = this.GetClientDetails(username);
+
+            // Send clientDetails to the client
+            connection.SendObject<ClientDetails>(PACKET_TYPE_CLIENTDETAILS_REPLY, clientDetails);
 
             this.NotifyObservers();
         }

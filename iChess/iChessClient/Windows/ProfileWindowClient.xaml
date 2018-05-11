@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iChessClient"
         mc:Ignorable="d"
-        Title="iChess - Mon profil" Height="300" Width="507" Closing="WindowProfile_Closing">
-    <Grid Background="#FFE0E0E0">
+        Title="iChess - Mon profil" Height="335" Width="507" Closing="WindowProfile_Closing">
+    <Grid Background="#FFE0E0E0" Margin="0,1,0,-1">
         <Rectangle HorizontalAlignment="Left" Height="504" Margin="218,-221,0,-14" VerticalAlignment="Top" Width="64" RenderTransformOrigin="0.5,0.5">
             <Rectangle.RenderTransform>
                 <TransformGroup>
@@ -28,8 +28,22 @@
         <Label x:Name="lblUsername" Content="Username" HorizontalAlignment="Left" Margin="309,6,-146,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="129" FontSize="20" FontWeight="Bold" Height="35"/>
         <Label x:Name="lblEloRating" Content="EloRating : 1500" HorizontalAlignment="Left" Margin="309,33,-146,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="129" FontSize="14" FontWeight="Bold"/>
         <Image x:Name="imgLogout" HorizontalAlignment="Left" Height="45" Margin="439,13,-192,0" VerticalAlignment="Top" Width="45" Source="/iChessClient;component/Pictures/mono-logout.png" RenderTransformOrigin="2.64,-0.12" MouseUp="imgLogout_MouseUp" OpacityMask="Black"/>
-        <Label Content="Mon profil" HorizontalAlignment="Left" Margin="33,64,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="24" Height="34" Padding="2"/>
-        <Image x:Name="imgReturn" HorizontalAlignment="Left" Height="20" Margin="10,72,0,0" VerticalAlignment="Top" Width="20" Source="/iChessClient;component/Pictures/return.png"/>
+        <Label Content="Mon profil" HorizontalAlignment="Left" Margin="32,61,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="24" Height="34" Padding="2"/>
+        <Image x:Name="imgBack" HorizontalAlignment="Left" Height="21" Margin="6,69,0,0" VerticalAlignment="Top" Width="22" Source="/iChessClient;component/Pictures/left-arrow.png" MouseUp="imgBack_MouseUp"/>
+        <Rectangle Fill="Black" HorizontalAlignment="Left" Height="2" Margin="0,93,-3,0" VerticalAlignment="Top" Width="502" StrokeThickness="0"/>
+        <Label Content="Statistiques" HorizontalAlignment="Left" Margin="181,96,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="18" Height="34" Padding="2"/>
+        <Rectangle Fill="#FF6E6E6E" HorizontalAlignment="Left" Height="1" Margin="0,121,-3,0" VerticalAlignment="Top" Width="502" StrokeThickness="0"/>
+        <Label x:Name="lblNbWins" Content="Victoires : 0" HorizontalAlignment="Left" Margin="10,123,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <Label x:Name="lblNbDefeats" Content="Défaites : 0" HorizontalAlignment="Left" Margin="143,123,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <Label x:Name="lblNbTies" Content="Égalités : 0" HorizontalAlignment="Left" Margin="276,123,0,0" VerticalAlignment="Top" FontSize="16" RenderTransformOrigin="0.365,0.452"/>
+        <Label x:Name="lblNbTotal" Content="Total : 0" HorizontalAlignment="Left" Margin="399,123,0,0" VerticalAlignment="Top" FontSize="16" RenderTransformOrigin="0.365,0.452" Width="86"/>
+        <Rectangle Fill="#FF6E6E6E" HorizontalAlignment="Left" Height="2" Margin="0,154,-3,0" VerticalAlignment="Top" Width="502" StrokeThickness="0"/>
+        <Label Content="Informations" HorizontalAlignment="Left" Margin="181,159,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="18" Height="34" Padding="2"/>
+        <Rectangle Fill="#FF6E6E6E" HorizontalAlignment="Left" Height="1" Margin="0,184,-3,0" VerticalAlignment="Top" Width="502" StrokeThickness="0"/>
+        <Label x:Name="lblInfoUsername" Content="Nom d'utilisateur : Username" HorizontalAlignment="Left" Margin="10,186,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <Label x:Name="lblInfoEloRating" Content="EloRating : 1500" HorizontalAlignment="Left" Margin="10,211,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <Label x:Name="lblRegistrationDate" Content="Inscrit depuis le 20.07.2018" HorizontalAlignment="Left" Margin="189,211,0,0" VerticalAlignment="Top" FontSize="16"/>
+        <Button x:Name="btnModifyProfile" Content="Modifier" HorizontalAlignment="Left" Margin="0,243,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" BorderBrush="Black"/>
     </Grid>
 
     <Window.Resources>

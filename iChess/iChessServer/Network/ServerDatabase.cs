@@ -109,6 +109,35 @@ namespace iChessServer
 
             return eloRating;
         }
+        
+        public static ClientDetails GetClientDetails(string username)
+        {
+            ClientDetails clientDetails = new ClientDetails();
+
+            // Connection
+            SQLiteConnection connection = new SQLiteConnection(string.Format("Data Source={0};Version={1};", DEFAULT_DB_PATH, DEFAULT_DB_VERSION));
+            connection.Open();
+
+            // Querry
+            string sql = string.Format("select * from Clients where username ='{0}'", username);
+            SQLiteCommand command = new SQLiteCommand(sql, connection);
+            SQLiteDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                int idClient = Convert.ToInt32(reader["idClient"]);
+                int registrationDate = Convert.ToInt32(reader["registrationDate"]);
+                int nbWins = Convert.ToInt32(reader["numberOfWins"]);
+                int nbDefeats = Convert.ToInt32(reader["numberOfDefeats"]);
+                int nbTies = Convert.ToInt32(reader["numberOfTies"]);
+                int nbTotal = nbWins + nbDefeats + nbTies;
+                int eloRating = Convert.ToInt32(reader["eloRating"]);
+                clientDetails = new ClientDetails(idClient, username, registrationDate, nbWins, nbDefeats, nbTies, eloRating);
+            }
+
+            connection.Close();
+
+            return clientDetails;
+        }
 
         #endregion
     }
