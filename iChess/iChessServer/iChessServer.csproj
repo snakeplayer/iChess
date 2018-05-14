@@ -99,6 +99,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Network\ClientCredentials.cs" />
     <Compile Include="Network\ClientDetails.cs" />
     <Compile Include="Network\ServerConnection.cs" />
     <Compile Include="Network\ServerDatabase.cs" />

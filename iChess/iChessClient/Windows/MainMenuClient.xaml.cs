@@ -86,6 +86,14 @@ namespace iChessClient
             profileWindow.Show();
         }
 
+        private void btnRanking_Click(object sender, RoutedEventArgs e)
+        {
+            RankingWindowClient rankingWindow = new RankingWindowClient(this.MyConnection);
+            rankingWindow.Owner = this;
+            this.Hide();
+            rankingWindow.Show();
+        }
+
         private void WindowMainMenu_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this.MyConnection.DisconnectFromServer();

@@ -84,6 +84,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Items\RankingItem.cs" />
+    <Compile Include="Network\ClientCredentials.cs" />
+    <Compile Include="Windows\ModifyProfileWindowClient.xaml.cs">
+      <DependentUpon>ModifyProfileWindowClient.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Network\ClientConnection.cs" />
     <Compile Include="Network\ClientDetails.cs" />
     <Compile Include="Windows\MainMenuClient.xaml.cs">
@@ -92,9 +97,16 @@
     <Compile Include="Windows\ProfileWindowClient.xaml.cs">
       <DependentUpon>ProfileWindowClient.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\RankingWindowClient.xaml.cs">
+      <DependentUpon>RankingWindowClient.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\RegisterWindowClient.xaml.cs">
       <DependentUpon>RegisterWindowClient.xaml</DependentUpon>
     </Compile>
+    <Page Include="Windows\ModifyProfileWindowClient.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\MainMenuClient.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -112,6 +124,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="Windows\ProfileWindowClient.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\RankingWindowClient.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

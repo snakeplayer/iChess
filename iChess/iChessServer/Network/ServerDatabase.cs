@@ -88,28 +88,6 @@ namespace iChessServer
             return clientsFromDB;
         }
 
-        public static int GetEloRating(string username)
-        {
-            int eloRating = -1;
-
-            // Connection
-            SQLiteConnection connection = new SQLiteConnection(string.Format("Data Source={0};Version={1};", DEFAULT_DB_PATH, DEFAULT_DB_VERSION));
-            connection.Open();
-
-            // Querry
-            string sql = string.Format("select eloRating from Clients where username ='{0}'", username);
-            SQLiteCommand command = new SQLiteCommand(sql, connection);
-            SQLiteDataReader reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                eloRating = Convert.ToInt32(reader["eloRating"]);
-            }
-
-            connection.Close();
-
-            return eloRating;
-        }
-        
         public static ClientDetails GetClientDetails(string username)
         {
             ClientDetails clientDetails = new ClientDetails();
@@ -137,6 +115,54 @@ namespace iChessServer
             connection.Close();
 
             return clientDetails;
+        }
+
+        public static bool ModifyClientProfile(string username, ClientCredentials clientCredentials)
+        {
+            bool modifySuccess = false;
+
+            // Connection
+            SQLiteConnection connection = new SQLiteConnection(string.Format("Data Source={0};Version={1};", DEFAULT_DB_PATH, DEFAULT_DB_VERSION));
+            connection.Open();
+
+            // Querry
+            string sql = string.Format("UPDATE Clients SET username='{0}', password='{1}' WHERE username='{2}';", clientCredentials.Username, clientCredentials.Password, username);
+            SQLiteCommand command = new SQLiteCommand(sql, connection);
+            try
+            {
+                command.ExecuteNonQuery();
+                modifySuccess = true;
+            }
+            catch (Exception)
+            {
+                modifySuccess = false;
+            }
+
+            connection.Close();
+
+            return modifySuccess;
+        }
+
+        public static int GetEloRating(string username)
+        {
+            int eloRating = -1;
+
+            // Connection
+            SQLiteConnection connection = new SQLiteConnection(string.Format("Data Source={0};Version={1};", DEFAULT_DB_PATH, DEFAULT_DB_VERSION));
+            connection.Open();
+
+            // Querry
+            string sql = string.Format("select eloRating from Clients where username ='{0}'", username);
+            SQLiteCommand command = new SQLiteCommand(sql, connection);
+            SQLiteDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                eloRating = Convert.ToInt32(reader["eloRating"]);
+            }
+
+            connection.Close();
+
+            return eloRating;
         }
 
         #endregion

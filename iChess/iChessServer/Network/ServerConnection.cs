@@ -40,6 +40,10 @@ namespace iChessServer
         private static string PACKET_TYPE_CLIENTDETAILS_REQUEST = "Client_ClientDetailsRequest";
         private static string PACKET_TYPE_CLIENTDETAILS_REPLY = "Server_ClientDetailsReply";
 
+        // ModifyProfile request
+        private static string PACKET_TYPE_MODIFYPROFILE_REQUEST = "Client_ModifyProfileRequest";
+        private static string PACKET_TYPE_MODIFYPROFILE_REPLY = "Server_ModifyProfileReply";
+
         // EloRating recovering
         private static string PACKET_TYPE_ELORATING_REQUEST = "Client_EloRatingRequest";
         private static string PACKET_TYPE_ELORATING_REPLY = "Client_EloRatingReply";
@@ -110,6 +114,9 @@ namespace iChessServer
                 // Handle ClientDetails request
                 NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_CLIENTDETAILS_REQUEST, ClientDetailsRequested);
 
+                // Handle ModifyProfile request
+                NetworkComms.AppendGlobalIncomingPacketHandler<ClientCredentials>(PACKET_TYPE_MODIFYPROFILE_REQUEST, ModifyProfileRequested);
+
                 // Handle "Client_EloRatingRequest" packet type for EloRating request
                 NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_ELORATING_REQUEST, EloRatingRequested);
             }
@@ -164,6 +171,11 @@ namespace iChessServer
         public ClientDetails GetClientDetails(string username)
         {
             return ServerDatabase.GetClientDetails(username);
+        }
+
+        public bool ModifyClientProfile(string username, ClientCredentials newClientCredentials)
+        {
+            return ServerDatabase.ModifyClientProfile(username, newClientCredentials);
         }
 
         public int GetEloRating(string username)
@@ -345,6 +357,24 @@ namespace iChessServer
             connection.SendObject<ClientDetails>(PACKET_TYPE_CLIENTDETAILS_REPLY, clientDetails);
 
             this.NotifyObservers();
+        }
+
+        private void ModifyProfileRequested(PacketHeader packetHeader, Connection connection, ClientCredentials newClientCredentials)
+        {
+            if (this.AuthenticatedClients.ContainsKey(connection))
+            {
+                if (this.ModifyClientProfile(this.AuthenticatedClients[connection], newClientCredentials))
+                {
+                    connection.SendObject<bool>(PACKET_TYPE_MODIFYPROFILE_REPLY, true);
+                    connection.CloseConnection(false); // The client have to reconnect
+                }
+                else
+                {
+                    connection.SendObject<bool>(PACKET_TYPE_MODIFYPROFILE_REPLY, false);
+                }
+
+                this.NotifyObservers();
+            }
         }
 
         private void EloRatingRequested(PacketHeader packetHeader, Connection connection, string username)

@@ -31,7 +31,7 @@
         <Button x:Name="btnCreateRoom" Content="Créer un salon" HorizontalAlignment="Left" Margin="0,116,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#99919191" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus"/>
         <Button x:Name="btnQuickMatch" Content="Partie rapide" HorizontalAlignment="Left" Margin="0,169,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus"/>
         <Button x:Name="btnShowRooms" Content="Salons" HorizontalAlignment="Left" Margin="0,63,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" BorderBrush="Black"/>
-        <Button x:Name="btnRanking" Content="Classement" HorizontalAlignment="Left" Margin="0,222,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#99919191" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus"/>
+        <Button x:Name="btnRanking" Content="Classement" HorizontalAlignment="Left" Margin="0,222,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#99919191" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" Click="btnRanking_Click"/>
     </Grid>
     <Window.Resources>
         <Style TargetType="Image">

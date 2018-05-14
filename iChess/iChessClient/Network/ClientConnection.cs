@@ -40,6 +40,10 @@ namespace iChessClient
         private static string PACKET_TYPE_CLIENTDETAILS_REQUEST = "Client_ClientDetailsRequest";
         private static string PACKET_TYPE_CLIENTDETAILS_REPLY = "Server_ClientDetailsReply";
 
+        // ModifyProfile request
+        private static string PACKET_TYPE_MODIFYPROFILE_REQUEST = "Client_ModifyProfileRequest";
+        private static string PACKET_TYPE_MODIFYPROFILE_REPLY = "Server_ModifyProfileReply";
+
         // EloRating recovering
         private static string PACKET_TYPE_ELORATING_REQUEST = "Client_EloRatingRequest";
         private static string PACKET_TYPE_ELORATING_REPLY = "Client_EloRatingReply";
@@ -174,6 +178,35 @@ namespace iChessClient
             {
                 throw new Exception("An error occured while trying to recover client's details.");
             }
+        }
+
+        /// <summary>
+        /// Ask the server to modify client's informations.
+        /// </summary>
+        /// <param name="username">The new username.</param>
+        /// <param name="password">The new password.</param>
+        /// <returns>-1 == an unknown error occured, 0 == the server has accepted the modification, 1 == the server refused the modification.</returns>
+        public int ModifyClientProfile(string username, string password)
+        {
+            int returnValue = -1;
+
+            try
+            {
+                if (this.MyConnection.SendReceiveObject<ClientCredentials, bool>(PACKET_TYPE_MODIFYPROFILE_REQUEST, PACKET_TYPE_MODIFYPROFILE_REPLY, 5000, new ClientCredentials(username, password)))
+                {
+                    returnValue = 0;
+                }
+                else
+                {
+                    returnValue = 1;
+                }
+            }
+            catch (Exception)
+            {
+                returnValue = -1;
+            }
+
+            return returnValue;
         }
 
         #endregion

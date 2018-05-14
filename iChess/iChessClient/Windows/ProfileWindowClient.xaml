@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iChessClient"
         mc:Ignorable="d"
-        Title="iChess - Mon profil" Height="335" Width="507" Closing="WindowProfile_Closing">
+        Title="iChess - Mon profil" Height="335" Width="507" Closing="WindowProfile_Closing" WindowStartupLocation="CenterOwner">
     <Grid Background="#FFE0E0E0" Margin="0,1,0,-1">
         <Rectangle HorizontalAlignment="Left" Height="504" Margin="218,-221,0,-14" VerticalAlignment="Top" Width="64" RenderTransformOrigin="0.5,0.5">
             <Rectangle.RenderTransform>
@@ -43,7 +43,7 @@
         <Label x:Name="lblInfoUsername" Content="Nom d'utilisateur : Username" HorizontalAlignment="Left" Margin="10,186,0,0" VerticalAlignment="Top" FontSize="16"/>
         <Label x:Name="lblInfoEloRating" Content="EloRating : 1500" HorizontalAlignment="Left" Margin="10,211,0,0" VerticalAlignment="Top" FontSize="16"/>
         <Label x:Name="lblRegistrationDate" Content="Inscrit depuis le 20.07.2018" HorizontalAlignment="Left" Margin="189,211,0,0" VerticalAlignment="Top" FontSize="16"/>
-        <Button x:Name="btnModifyProfile" Content="Modifier" HorizontalAlignment="Left" Margin="0,243,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" BorderBrush="Black"/>
+        <Button x:Name="btnModifyProfile" Content="Modifier" HorizontalAlignment="Left" Margin="0,243,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" BorderBrush="Black" Click="btnModifyProfile_Click"/>
     </Grid>
 
     <Window.Resources>
