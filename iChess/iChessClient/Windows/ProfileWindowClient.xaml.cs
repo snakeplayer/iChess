@@ -60,7 +60,7 @@ namespace iChessClient
         public void UpdateView()
         {
             // Recovering client details
-            ClientDetails clientDetails = ClientConnection.GetClientDetails(this.MyConnection.GetServerIP(), this.MyConnection.GetServerPort(), this.MyConnection.GetUsername());
+            ClientDetails clientDetails = this.MyConnection.GetMyDetails();
 
             // Header
             this.lblUsername.Content = clientDetails.Username;

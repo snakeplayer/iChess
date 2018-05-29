@@ -61,9 +61,10 @@ namespace iChessClient
 
         public void UpdateView()
         {
-            int eloRating = ClientConnection.GetEloRating(this.MyConnection.GetServerIP(), this.MyConnection.GetServerPort(), this.MyConnection.GetUsername());
+            string username = this.MyConnection.Details.Username;
+            int eloRating = this.MyConnection.Details.EloRating;
 
-            this.lblUsername.Content = this.MyConnection.GetUsername();
+            this.lblUsername.Content = username;
             this.lblEloRating.Content = string.Format("EloRating : {0}", eloRating);
         }
 

@@ -85,6 +85,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Items\RankingItem.cs" />
+    <Compile Include="Network\AllClientsDetails.cs" />
     <Compile Include="Network\ClientCredentials.cs" />
     <Compile Include="Windows\ModifyProfileWindowClient.xaml.cs">
       <DependentUpon>ModifyProfileWindowClient.xaml</DependentUpon>

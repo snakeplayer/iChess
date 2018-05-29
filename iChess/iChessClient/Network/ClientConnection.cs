@@ -26,45 +26,48 @@ namespace iChessClient
     {
         #region Constants
 
-        private string DEFAULT_USERNAME = "NO_USERNAME";
+        // General
+        private const int DEFAULT_TIMEOUT = 5000;
 
-        // Register
-        private static string PACKET_TYPE_REGISTER_REQUEST = "Client_RegisterRequest";
-        private static string PACKET_TYPE_REGISTER_REPLY = "Server_RegisterReply";
+        // Registration request
+        private const string PACKET_TYPE_REGISTRATION_REQUEST = "RegistrationRequest";
+        private const string PACKET_TYPE_REGISTRATION_REPLY = "RegistrationReply";
 
-        // Login
-        private string PACKET_TYPE_LOGIN_REQUEST = "Client_LoginRequest";
-        private string PACKET_TYPE_LOGIN_REPLY = "Server_LoginReply";
+        // Login request
+        private const string PACKET_TYPE_LOGIN_REQUEST = "LoginRequest";
+        private const string PACKET_TYPE_LOGIN_REPLY = "LoginReply";
 
-        // ClientDetails recovering
-        private static string PACKET_TYPE_CLIENTDETAILS_REQUEST = "Client_ClientDetailsRequest";
-        private static string PACKET_TYPE_CLIENTDETAILS_REPLY = "Server_ClientDetailsReply";
+        // MyDetails recovering
+        private const string PACKET_TYPE_MYDETAILS_REQUEST = "MyDetailsRequest";
+        private const string PACKET_TYPE_MYDETAILS_REPLY = "MyDetailsReply";
+
+        // AllClientsDetails recovering
+        private const string PACKET_TYPE_ALLCLIENTSDETAILS_REQUEST = "AllClientsDetailsRequest";
+        private const string PACKET_TYPE_ALLCLIENTSDETAILS_REPLY = "AllClientsDetailsReply";
 
         // ModifyProfile request
-        private static string PACKET_TYPE_MODIFYPROFILE_REQUEST = "Client_ModifyProfileRequest";
-        private static string PACKET_TYPE_MODIFYPROFILE_REPLY = "Server_ModifyProfileReply";
-
-        // EloRating recovering
-        private static string PACKET_TYPE_ELORATING_REQUEST = "Client_EloRatingRequest";
-        private static string PACKET_TYPE_ELORATING_REPLY = "Client_EloRatingReply";
+        private const string PACKET_TYPE_MODIFYPROFILE_REQUEST = "ModifyProfileRequest";
+        private const string PACKET_TYPE_MODIFYPROFILE_REPLY = "ModifyProfileReply";
 
         #endregion
 
         #region Properties
 
+        /// <summary>
+        /// The connection with the iChess server.
+        /// </summary>
         private Connection MyConnection { get; set; }
 
-        private string Username { get; set; }
-        private string ServerIP { get; set; }
-        private int ServerPort { get; set; }
-
+        /// <summary>
+        /// The details of the current connection, for example the Username, the EloRating, etc.
+        /// </summary>
         public ClientDetails Details
         {
             get
             {
-                if (this.ServerIP != string.Empty && this.ServerPort != -1)
+                if (this.MyConnection != null)
                 {
-                    return ClientConnection.GetClientDetails(this.GetServerIP(), this.GetServerPort(), this.GetUsername());
+                    return this.GetMyDetails();
                 }
                 else
                 {
@@ -73,6 +76,9 @@ namespace iChessClient
             }
         }
 
+        /// <summary>
+        /// A flag used to know if Handlers are already defined.
+        /// </summary>
         private bool FirstInitialization { get; set; }
 
         #endregion
@@ -84,34 +90,12 @@ namespace iChessClient
         /// </summary>
         public ClientConnection()
         {
-            this.Username = DEFAULT_USERNAME;
-            this.ServerIP = string.Empty;
-            this.ServerPort = -1;
             this.FirstInitialization = true;
         }
 
         #endregion
 
-        #region Methods (Tell, Don't Ask)
-
-        public string GetUsername()
-        {
-            return this.Username;
-        }
-
-        public string GetServerIP()
-        {
-            return this.ServerIP;
-        }
-
-        public int GetServerPort()
-        {
-            return this.ServerPort;
-        }
-
-        #endregion
-
-        #region Methods (Database)
+        #region Methods (Registration, connect & disconnect)
 
         /// <summary>
         /// Allows to register on an iChess server.
@@ -120,98 +104,34 @@ namespace iChessClient
         /// <param name="port">The port of the server.</param>
         /// <param name="username">The username of the client.</param>
         /// <param name="password">The password of the client.</param>
-        /// <returns></returns>
+        /// <returns>-1 == unable to contact the server, 0 == the server has accepted the registration, 1 == the server refused the registration.</returns>
         public static int RegisterToServer(string ipAddress, int port, string username, string password)
         {
             // Initializing the return value
-            int registerAllowed = -1;
+            int registrationAllowed = -1;
 
             try
             {
                 // Format credentials
-                string credentials = string.Format("{0}:{1}", username, password);
+                string credentials = string.Format("{0}:{1}", username, password); // TODO : use ClientCredentials
 
                 // Send the registration request and wait 5000ms for a reply
-                if (NetworkComms.SendReceiveObject<string, bool>(PACKET_TYPE_REGISTER_REQUEST, ipAddress, port, PACKET_TYPE_REGISTER_REPLY, 5000, credentials))
+                if (NetworkComms.SendReceiveObject<string, bool>(PACKET_TYPE_REGISTRATION_REQUEST, ipAddress, port, PACKET_TYPE_REGISTRATION_REPLY, DEFAULT_TIMEOUT, credentials))
                 {
-                    registerAllowed = 0; // The server has accepted the registration
+                    registrationAllowed = 0; // The server has accepted the registration
                 }
                 else
                 {
-                    registerAllowed = 1; // The server has refused the registration
+                    registrationAllowed = 1; // The server has refused the registration
                 }
             }
             catch (Exception)
             {
-                registerAllowed = -1; // An error occured
+                registrationAllowed = -1; // An error occured
             }
 
-            return registerAllowed;
+            return registrationAllowed;
         }
-
-        public static int GetEloRating(string ipAddress, int port, string username)
-        {
-            // Initializing the return value
-            int returnValue = -1;
-
-            try
-            {
-                // Send the EloRating request and wait 5000ms for a reply
-                returnValue = NetworkComms.SendReceiveObject<string, int>(PACKET_TYPE_ELORATING_REQUEST, ipAddress, port, PACKET_TYPE_ELORATING_REPLY, 5000, username);
-            }
-            catch (Exception)
-            {
-                returnValue = -1; // An error occured
-            }
-
-            return returnValue;
-        }
-
-        public static ClientDetails GetClientDetails(string ipAddress, int port, string username)
-        {
-            try
-            {
-                ClientDetails clientDetails = NetworkComms.SendReceiveObject<string, ClientDetails>(PACKET_TYPE_CLIENTDETAILS_REQUEST, ipAddress, port, PACKET_TYPE_CLIENTDETAILS_REPLY, 5000, username);
-                return clientDetails;
-            }
-            catch (Exception)
-            {
-                throw new Exception("An error occured while trying to recover client's details.");
-            }
-        }
-
-        /// <summary>
-        /// Ask the server to modify client's informations.
-        /// </summary>
-        /// <param name="username">The new username.</param>
-        /// <param name="password">The new password.</param>
-        /// <returns>-1 == an unknown error occured, 0 == the server has accepted the modification, 1 == the server refused the modification.</returns>
-        public int ModifyClientProfile(string username, string password)
-        {
-            int returnValue = -1;
-
-            try
-            {
-                if (this.MyConnection.SendReceiveObject<ClientCredentials, bool>(PACKET_TYPE_MODIFYPROFILE_REQUEST, PACKET_TYPE_MODIFYPROFILE_REPLY, 5000, new ClientCredentials(username, password)))
-                {
-                    returnValue = 0;
-                }
-                else
-                {
-                    returnValue = 1;
-                }
-            }
-            catch (Exception)
-            {
-                returnValue = -1;
-            }
-
-            return returnValue;
-        }
-
-        #endregion
-
-        #region Methods (Login & logout)
 
         /// <summary>
         /// Establishes a connection with the server.
@@ -224,7 +144,7 @@ namespace iChessClient
         public int ConnectToServer(string ipAddress, int port, string username, string password)
         {
             // Initializing the return value
-            int connectionAllowed = -1;
+            int connectionResult = -1;
 
             // Reset connection
             this.DisconnectFromServer();
@@ -246,27 +166,24 @@ namespace iChessClient
                 }
 
                 // Format credentials
-                string credentials = string.Format("{0}:{1}", username, password);
+                string credentials = string.Format("{0}:{1}", username, password); // TODO : use ClientCredentials
 
                 // Send the connection request and wait 5000ms for a reply
-                if (this.MyConnection.SendReceiveObject<string, bool>(PACKET_TYPE_LOGIN_REQUEST, PACKET_TYPE_LOGIN_REPLY, 5000, credentials))
+                if (this.MyConnection.SendReceiveObject<string, bool>(PACKET_TYPE_LOGIN_REQUEST, PACKET_TYPE_LOGIN_REPLY, DEFAULT_TIMEOUT, credentials))
                 {
-                    connectionAllowed = 0; // The server has accepted the connection
-                    this.Username = username;
-                    this.ServerIP = ipAddress;
-                    this.ServerPort = port;
+                    connectionResult = 0; // The server has accepted the connection
                 }
                 else
                 {
-                    connectionAllowed = 1; // The server refused the connection
+                    connectionResult = 1; // The server refused the connection
                 }
             }
             catch (Exception)
             {
-                connectionAllowed = -1; // An error occured
+                connectionResult = -1; // An error occured
             }
 
-            return connectionAllowed;
+            return connectionResult;
         }
 
         /// <summary>
@@ -280,12 +197,77 @@ namespace iChessClient
 
         #endregion
 
+        #region Methods (Get/send various data from/to the server)
+
+        /// <summary>
+        /// Ask the server the current connection's details.
+        /// </summary>
+        /// <returns>An instance of ClientDetails containing the current connection's client's details.</returns>
+        public ClientDetails GetMyDetails()
+        {
+            try
+            {
+                return this.MyConnection.SendReceiveObject<ClientDetails>(PACKET_TYPE_MYDETAILS_REQUEST, PACKET_TYPE_MYDETAILS_REPLY, DEFAULT_TIMEOUT);
+            }
+            catch (Exception)
+            {
+                throw new Exception("An error occured while trying to recover client's details.");
+            }
+        }
+
+        /// <summary>
+        /// Ask the server the details of all registered clients.
+        /// </summary>
+        /// <returns>An instance of AllClientsDetails containing all client's details.</returns>
+        public AllClientsDetails GetAllClientsDetails()
+        {
+            try
+            {
+                return this.MyConnection.SendReceiveObject<AllClientsDetails>(PACKET_TYPE_ALLCLIENTSDETAILS_REQUEST, PACKET_TYPE_ALLCLIENTSDETAILS_REPLY, DEFAULT_TIMEOUT);
+            }
+            catch (Exception)
+            {
+                throw new Exception("An error occured while trying to recover all client's details.");
+            }
+        }
+
+        /// <summary>
+        /// Ask the server to modify client's informations.
+        /// </summary>
+        /// <param name="username">The new username.</param>
+        /// <param name="password">The new password.</param>
+        /// <returns>-1 == an unknown error occured, 0 == the server has accepted the modification, 1 == the server refused the modification.</returns>
+        public int ModifyClientProfile(string username, string password)
+        {
+            int returnValue = -1;
+
+            try
+            {
+                if (this.MyConnection.SendReceiveObject<ClientCredentials, bool>(PACKET_TYPE_MODIFYPROFILE_REQUEST, PACKET_TYPE_MODIFYPROFILE_REPLY, DEFAULT_TIMEOUT, new ClientCredentials(username, password)))
+                {
+                    returnValue = 0;
+                }
+                else
+                {
+                    returnValue = 1;
+                }
+            }
+            catch (Exception)
+            {
+                returnValue = -1;
+            }
+
+            return returnValue;
+        }
+
+        #endregion
+
         #region Methods (Handler)
 
         /// <summary>
-        /// Triggered when the connection is lost.
+        /// Called when the connection is lost.
         /// </summary>
-        /// <param name="connection">The connection object reference.</param>
+        /// <param name="connection">The connection's object reference.</param>
         private void HandleConnectionClosed(Connection connection)
         {
             this.DisconnectFromServer();

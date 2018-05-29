@@ -28,25 +28,28 @@ namespace iChessServer
     {
         #region Constants
 
-        // Register
-        private string PACKET_TYPE_REGISTER_REQUEST = "Client_RegisterRequest";
-        private string PACKET_TYPE_REGISTER_REPLY = "Server_RegisterReply";
+        // General
+        private const int DEFAULT_PORT = 8080;
 
-        // Login
-        private string PACKET_TYPE_LOGIN_REQUEST = "Client_LoginRequest";
-        private string PACKET_TYPE_LOGIN_REPLY = "Server_LoginReply";
+        // Registration request
+        private const string PACKET_TYPE_REGISTRATION_REQUEST = "RegistrationRequest";
+        private const string PACKET_TYPE_REGISTRATION_REPLY = "RegistrationReply";
 
-        // ClientDetails recovering
-        private static string PACKET_TYPE_CLIENTDETAILS_REQUEST = "Client_ClientDetailsRequest";
-        private static string PACKET_TYPE_CLIENTDETAILS_REPLY = "Server_ClientDetailsReply";
+        // Login request
+        private const string PACKET_TYPE_LOGIN_REQUEST = "LoginRequest";
+        private const string PACKET_TYPE_LOGIN_REPLY = "LoginReply";
+
+        // MyDetails recovering
+        private const string PACKET_TYPE_MYDETAILS_REQUEST = "MyDetailsRequest";
+        private const string PACKET_TYPE_MYDETAILS_REPLY = "MyDetailsReply";
+
+        // AllClientsDetails recovering
+        private const string PACKET_TYPE_ALLCLIENTSDETAILS_REQUEST = "AllClientsDetailsRequest";
+        private const string PACKET_TYPE_ALLCLIENTSDETAILS_REPLY = "AllClientsDetailsReply";
 
         // ModifyProfile request
-        private static string PACKET_TYPE_MODIFYPROFILE_REQUEST = "Client_ModifyProfileRequest";
-        private static string PACKET_TYPE_MODIFYPROFILE_REPLY = "Server_ModifyProfileReply";
-
-        // EloRating recovering
-        private static string PACKET_TYPE_ELORATING_REQUEST = "Client_EloRatingRequest";
-        private static string PACKET_TYPE_ELORATING_REPLY = "Client_EloRatingReply";
+        private const string PACKET_TYPE_MODIFYPROFILE_REQUEST = "ModifyProfileRequest";
+        private const string PACKET_TYPE_MODIFYPROFILE_REPLY = "ModifyProfileReply";
 
         #endregion
 
@@ -59,28 +62,49 @@ namespace iChessServer
 
         #region Properties
 
+        /// <summary>
+        /// A list of IObserverWindow, used to call UpdateView() method on attached views.
+        /// </summary>
         private List<IObserverWindow> Observers { get; set; }
 
-        private Dictionary<string, string> DBClients {
-            get {
+        /// <summary>
+        /// Contains client's usernames and passwords from SQLite database.
+        /// </summary>
+        private Dictionary<string, string> DBClients
+        {
+            get
+            {
                 return ServerDatabase.GetClientsFromDB();
             }
         }
-        private Dictionary<Connection, string> AuthenticatedClients {
-            get {
+
+        /// <summary>
+        /// Contains Connections and usernames of authenticated clients.
+        /// </summary>
+        private Dictionary<Connection, string> AuthenticatedClients
+        {
+            get
+            {
                 return _authenticatedClients;
             }
-            set {
+            set
+            {
                 _authenticatedClients = value;
                 this.NotifyObservers();
             }
         }
 
-        private string Logs {
-            get {
+        /// <summary>
+        /// Contains the logs and call NotifyObservers() when the value changes.
+        /// </summary>
+        private string Logs
+        {
+            get
+            {
                 return _logs;
             }
-            set {
+            set
+            {
                 _logs = value;
                 this.NotifyObservers();
             }
@@ -102,23 +126,23 @@ namespace iChessServer
 
             try
             {
-                // Handle connections closing
+                // Handles connections closing
                 NetworkComms.AppendGlobalConnectionCloseHandler(HandleConnectionClosed);
 
-                // Handle "RegisterRequest" packet type for register request
-                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_REGISTER_REQUEST, RegisterRequested);
+                // Handles registration requests
+                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_REGISTRATION_REQUEST, HandleRegistrationRequested);
 
-                // Handle "Client_LoginRequest" packet type for login request
-                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_LOGIN_REQUEST, LoginRequested);
+                // Handles login requests
+                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_LOGIN_REQUEST, HandleLoginRequested);
 
-                // Handle ClientDetails request
-                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_CLIENTDETAILS_REQUEST, ClientDetailsRequested);
+                // Handles client's details requests
+                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_MYDETAILS_REQUEST, HandleMyDetailsRequested);
 
-                // Handle ModifyProfile request
-                NetworkComms.AppendGlobalIncomingPacketHandler<ClientCredentials>(PACKET_TYPE_MODIFYPROFILE_REQUEST, ModifyProfileRequested);
+                // Handles all clients details requests
+                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_ALLCLIENTSDETAILS_REQUEST, HandleAllClientsDetailsRequested);
 
-                // Handle "Client_EloRatingRequest" packet type for EloRating request
-                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_ELORATING_REQUEST, EloRatingRequested);
+                // Handles profile modifications requests
+                NetworkComms.AppendGlobalIncomingPacketHandler<ClientCredentials>(PACKET_TYPE_MODIFYPROFILE_REQUEST, HandleModifyProfileRequested);
             }
             catch (Exception e)
             {
@@ -128,10 +152,10 @@ namespace iChessServer
 
         #endregion
 
-        #region Methods (Tell, Don't Ask)
+        #region Methods (Get)
 
         /// <summary>
-        /// Retrieve the list of authenticated clients.
+        /// Returns the list of authenticated clients.
         /// </summary>
         /// <returns>A list of string conatining authenticated clients.</returns>
         public List<string> GetAuthenticatedClients()
@@ -145,7 +169,7 @@ namespace iChessServer
         }
 
         /// <summary>
-        /// Retrieve the logs.
+        /// Returns the logs.
         /// </summary>
         /// <returns>The logs of the server.</returns>
         public string GetLogs()
@@ -155,67 +179,16 @@ namespace iChessServer
 
         #endregion
 
-        #region Methods (Database)
+        #region Methods (Utilities)
 
         /// <summary>
-        /// Allows a client to register.
+        /// Tests if the incoming connection is from an authenticated client.
         /// </summary>
-        /// <param name="username">The username of the client.</param>
-        /// <param name="password">The password of the client.</param>
-        /// <returns>True if the client registered successfully, false if not.</returns>
-        public bool RegisterClient(string username, string password)
+        /// <param name="connection">The incoming connection.</param>
+        /// <returns>true == the connection is from an authenticated client, false == the connection is NOT from an authenticated client.</returns>
+        private bool IsClientAuthenticated(Connection connection)
         {
-            return ServerDatabase.RegisterClient(username, password);
-        }
-
-        public ClientDetails GetClientDetails(string username)
-        {
-            return ServerDatabase.GetClientDetails(username);
-        }
-
-        public bool ModifyClientProfile(string username, ClientCredentials newClientCredentials)
-        {
-            return ServerDatabase.ModifyClientProfile(username, newClientCredentials);
-        }
-
-        public int GetEloRating(string username)
-        {
-            return ServerDatabase.GetEloRating(username);
-        }
-
-        #endregion
-
-        #region Methods (Observers)
-
-        /// <summary>
-        /// Add an IObserverWindow to the list.
-        /// </summary>
-        /// <param name="observerWindow">The IObserverWindow to add.</param>
-        public void RegisterObserver(IObserverWindow observerWindow)
-        {
-            this.Observers.Add(observerWindow);
-            this.NotifyObservers();
-        }
-
-        /// <summary>
-        /// Remove an IObserverWindow from the list.
-        /// </summary>
-        /// <param name="observerWindow">The IObserverWindow to remove.</param>
-        public void UnregisterObserver(IObserverWindow observerWindow)
-        {
-            this.Observers.Add(observerWindow);
-            this.NotifyObservers();
-        }
-
-        /// <summary>
-        /// Notify all registered IObserverWindow.
-        /// </summary>
-        public void NotifyObservers()
-        {
-            lock (this.Observers)
-            {
-                this.Observers.ToList().ForEach(obs => obs.UpdateView());
-            }
+            return this.AuthenticatedClients.ContainsKey(connection);
         }
 
         #endregion
@@ -233,7 +206,7 @@ namespace iChessServer
             try
             {
                 // Start listening for incoming connections
-                Connection.StartListening(ConnectionType.TCP, new IPEndPoint(IPAddress.Any, 8080));
+                Connection.StartListening(ConnectionType.TCP, new IPEndPoint(IPAddress.Any, DEFAULT_PORT)); // TODO : use const or CONFIG FILE !!
 
                 // Shows Network state
                 lock (this.Logs)
@@ -286,22 +259,17 @@ namespace iChessServer
         /// <param name="packetHeader">The packet header.</param>
         /// <param name="connection">The connection.</param>
         /// <param name="credentials">The credentials.</param>
-        private void RegisterRequested(PacketHeader packetHeader, Connection connection, string credentials)
+        private void HandleRegistrationRequested(PacketHeader packetHeader, Connection connection, string credentials)
         {
             // Parse the necessary information out of the provided string
             string username = credentials.Split(':').First();
             string password = credentials.Split(':').Last();
 
-            if (this.RegisterClient(username, password))
-            {
-                // Send a positive reply to the client
-                connection.SendObject<bool>(PACKET_TYPE_REGISTER_REPLY, true);
-            }
-            else
-            {
-                // Send a negative reply to the client
-                connection.SendObject<bool>(PACKET_TYPE_REGISTER_REPLY, false);
-            }
+            // Try to register the client
+            bool registrationAccomplished = ServerDatabase.RegisterClient(username, password);
+
+            // Send a reply to the client
+            connection.SendObject<bool>(PACKET_TYPE_REGISTRATION_REPLY, registrationAccomplished);
 
             this.NotifyObservers();
         }
@@ -312,7 +280,7 @@ namespace iChessServer
         /// <param name="packetHeader">The packet header.</param>
         /// <param name="connection">The connection.</param>
         /// <param name="credentials">The credentials.</param>
-        private void LoginRequested(PacketHeader packetHeader, Connection connection, string credentials)
+        private void HandleLoginRequested(PacketHeader packetHeader, Connection connection, string credentials)
         {
             lock (this.AuthenticatedClients)
             {
@@ -327,43 +295,77 @@ namespace iChessServer
                 }
 
                 // If the client's account is not already used and if credentials are correct
-                if (!this.AuthenticatedClients.ContainsValue(username) && (this.DBClients.ContainsKey(username) && this.DBClients[username] == password))
+                bool loginAllowed = !this.AuthenticatedClients.ContainsValue(username) &&
+                                        (this.DBClients.ContainsKey(username) &&
+                                        this.DBClients[username] == password);
+
+                if (loginAllowed)
                 {
                     // Add the client to the list
                     this.AuthenticatedClients.Add(connection, username);
 
-                    // Send a reply to the client
-                    connection.SendObject<bool>(PACKET_TYPE_LOGIN_REPLY, true);
-
                     // Add a message to logs
                     this.Logs += string.Format("{0} is now connected !\n", this.AuthenticatedClients[connection]);
                 }
-                else
-                {
-                    // Send a reply to the client
-                    connection.SendObject<bool>(PACKET_TYPE_LOGIN_REPLY, false);
-                }
+
+                // Send a reply to the client
+                connection.SendObject<bool>(PACKET_TYPE_LOGIN_REPLY, loginAllowed);
             }
 
             this.NotifyObservers();
         }
 
-        private void ClientDetailsRequested(PacketHeader packetHeader, Connection connection, string username)
+        /// <summary>
+        /// Called when a connection's client's details request is made.
+        /// </summary>
+        /// <param name="packetHeader">The packet header.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="incomingObject"></param>
+        private void HandleMyDetailsRequested(PacketHeader packetHeader, Connection connection, string incomingObject)
         {
-            // ClientDetails recovering from database
-            ClientDetails clientDetails = this.GetClientDetails(username);
+            if (this.IsClientAuthenticated(connection))
+            {
+                // ClientDetails recovering from database
+                ClientDetails clientDetails = ServerDatabase.GetClientDetails(this.AuthenticatedClients[connection]);
 
-            // Send clientDetails to the client
-            connection.SendObject<ClientDetails>(PACKET_TYPE_CLIENTDETAILS_REPLY, clientDetails);
+                // Send clientDetails to the client
+                connection.SendObject<ClientDetails>(PACKET_TYPE_MYDETAILS_REPLY, clientDetails);
 
-            this.NotifyObservers();
+                this.NotifyObservers();
+            }
         }
 
-        private void ModifyProfileRequested(PacketHeader packetHeader, Connection connection, ClientCredentials newClientCredentials)
+        /// <summary>
+        /// Called when an all client's details request is made.
+        /// </summary>
+        /// <param name="packetHeader">The packet header.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="incomingObject"></param>
+        private void HandleAllClientsDetailsRequested(PacketHeader packetHeader, Connection connection, string incomingObject)
         {
-            if (this.AuthenticatedClients.ContainsKey(connection))
+            if (this.IsClientAuthenticated(connection))
             {
-                if (this.ModifyClientProfile(this.AuthenticatedClients[connection], newClientCredentials))
+                // AllClientsDetails recovering from database
+                AllClientsDetails allClientsDetails = ServerDatabase.GetAllClientsDetails();
+
+                // Send allClientsDetails to the client
+                connection.SendObject<AllClientsDetails>(PACKET_TYPE_ALLCLIENTSDETAILS_REPLY, allClientsDetails);
+
+                this.NotifyObservers();
+            }
+        }
+
+        /// <summary>
+        /// Called when a profile modification request is made.
+        /// </summary>
+        /// <param name="packetHeader">The packet header.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="newClientCredentials">The new client's credentials.</param>
+        private void HandleModifyProfileRequested(PacketHeader packetHeader, Connection connection, ClientCredentials newClientCredentials)
+        {
+            if (this.IsClientAuthenticated(connection))
+            {
+                if (ServerDatabase.ModifyClientProfile(this.AuthenticatedClients[connection], newClientCredentials))
                 {
                     connection.SendObject<bool>(PACKET_TYPE_MODIFYPROFILE_REPLY, true);
                     connection.CloseConnection(false); // The client have to reconnect
@@ -375,17 +377,6 @@ namespace iChessServer
 
                 this.NotifyObservers();
             }
-        }
-
-        private void EloRatingRequested(PacketHeader packetHeader, Connection connection, string username)
-        {
-            // EloRating recovery from database
-            int eloRating = this.GetEloRating(username);
-
-            // Send a reply to the client
-            connection.SendObject<int>(PACKET_TYPE_ELORATING_REPLY, eloRating);
-
-            this.NotifyObservers();
         }
 
         /// <summary>
@@ -409,6 +400,41 @@ namespace iChessServer
             }
 
             this.NotifyObservers();
+        }
+
+        #endregion
+
+        #region Methods (Observers)
+
+        /// <summary>
+        /// Add an IObserverWindow to the list.
+        /// </summary>
+        /// <param name="observerWindow">The IObserverWindow to add.</param>
+        public void RegisterObserver(IObserverWindow observerWindow)
+        {
+            this.Observers.Add(observerWindow);
+            this.NotifyObservers();
+        }
+
+        /// <summary>
+        /// Remove an IObserverWindow from the list.
+        /// </summary>
+        /// <param name="observerWindow">The IObserverWindow to remove.</param>
+        public void UnregisterObserver(IObserverWindow observerWindow)
+        {
+            this.Observers.Add(observerWindow);
+            this.NotifyObservers();
+        }
+
+        /// <summary>
+        /// Notify all registered IObserverWindow.
+        /// </summary>
+        public void NotifyObservers()
+        {
+            lock (this.Observers)
+            {
+                this.Observers.ToList().ForEach(obs => obs.UpdateView());
+            }
         }
 
         #endregion

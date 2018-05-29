@@ -55,7 +55,7 @@ namespace iChessClient
 
         public void UpdateView()
         {
-            tbxUsername.Text = this.MyConnection.GetUsername();
+            tbxUsername.Text = this.MyConnection.Details.Username;
             tbxPassword.Text = string.Empty;
             tbxPasswordConfirmation.Text = string.Empty;
         }
