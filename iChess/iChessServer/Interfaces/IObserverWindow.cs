@@ -7,16 +7,16 @@
  * File description: An interface used to apply the Observer-Subject design pattern.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace iChessServer
 {
+    /// <summary>
+    /// An interface used to apply the Observer-Subject design pattern.
+    /// </summary>
     public interface IObserverWindow
     {
+        /// <summary>
+        /// Updates the user interface.
+        /// </summary>
         void UpdateView();
     }
 }

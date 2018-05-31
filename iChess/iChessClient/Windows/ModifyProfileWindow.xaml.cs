@@ -3,46 +3,39 @@
  * Date: 2018
  * Project: iChessClient
  * Project description: A local network chess game. 
- * File: ModifyProfileWindowClient.xaml.cs
+ * File: ModifyProfileWindow.xaml.cs
  * File description: The modify profile user interface.
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace iChessClient
 {
     /// <summary>
-    /// Logique d'interaction pour ModifyProfileWindowClient.xaml
+    /// The modify profile user interface.
     /// </summary>
-    public partial class ModifyProfileWindowClient : Window
+    public partial class ModifyProfileWindow : Window
     {
         #region Properties
 
+        /// <summary>
+        /// Handles connection with the iChess server.
+        /// </summary>
         public ClientConnection MyConnection { get; set; }
 
         #endregion
 
         #region Constructors
 
-        public ModifyProfileWindowClient(ClientConnection connection)
+        /// <summary>
+        /// Constructor of ModifyProfileWindow class.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        public ModifyProfileWindow(ClientConnection connection)
         {
             InitializeComponent();
-
-            // Custom icon
-            Uri iconUri = new Uri(@"C:\Users\Administrateur\Documents\T_DIPL\Documentation\Poster\Logo_iChess.png", UriKind.RelativeOrAbsolute);
-            this.Icon = BitmapFrame.Create(iconUri);
 
             this.MyConnection = connection;
 
@@ -53,6 +46,9 @@ namespace iChessClient
 
         #region Methods
 
+        /// <summary>
+        /// Updates the user interface.
+        /// </summary>
         public void UpdateView()
         {
             tbxUsername.Text = this.MyConnection.Details.Username;
@@ -64,6 +60,9 @@ namespace iChessClient
 
         #region Methods (Events)
 
+        /// <summary>
+        /// Called when btnConfirm is clicked. Ask the server to modify the profile.
+        /// </summary>
         private void btnConfirm_Click(object sender, RoutedEventArgs e)
         {
             if (tbxPassword.Text == tbxPasswordConfirmation.Text)
@@ -99,6 +98,9 @@ namespace iChessClient
             }
         }
 
+        /// <summary>
+        /// Called when btnCancel is clicked.
+        /// </summary>
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             this.Hide();

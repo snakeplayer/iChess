@@ -1,4 +1,4 @@
-﻿<Window x:Name="WindowLogin" x:Class="iChessClient.MainWindow"
+﻿<Window x:Name="Login" x:Class="iChessClient.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,10 +6,10 @@
         xmlns:local="clr-namespace:iChessClient"
         mc:Ignorable="d"
         Title="iChess - Connexion" Height="404" Width="324"
-        UseLayoutRounding="True" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner">
+        UseLayoutRounding="True" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner" Icon="/iChessClient;component/Pictures/iChess_Logo_Small.png">
     <Grid Background="#FFE0E0E0">
 
-        <Image x:Name="imgLogo" HorizontalAlignment="Left" Height="69" Margin="-4,-3,-50,0" VerticalAlignment="Top" Width="372" Source="/iChessClient;component/Pictures/iChessLogoTall@4x.png"/>
+        <Image x:Name="imgLogo" HorizontalAlignment="Left" Height="69" Margin="-4,-3,-50,0" VerticalAlignment="Top" Width="372" Source="/iChessClient;component/Pictures/iChess_Logo_Large.png"/>
         <TextBox x:Name="tbxPort" HorizontalAlignment="Left" Height="27" Margin="197,113,0,0" TextWrapping="Wrap" Text="8080" VerticalAlignment="Top" Width="101" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}" Foreground="#FF2A2A2A"/>
         <Button x:Name="btnConfirm" Content="Confirmer" HorizontalAlignment="Left" Margin="10,237,0,0" VerticalAlignment="Top" Width="288" Height="44" FontSize="22" Background="#BF0DA017" BorderThickness="0" Click="btnConfirm_Click" Foreground="#FF1D1D1D" FontFamily="Optimus"/>
         <Button x:Name="btnRegistration" Content="Pas encore inscrit ?" HorizontalAlignment="Left" Margin="10,281,0,0" VerticalAlignment="Top" Width="288" Height="38" FontSize="20" Background="#99919191" BorderThickness="0" Click="btnRegistration_Click" Foreground="#FF1D1D1D" FontFamily="Optimus"/>

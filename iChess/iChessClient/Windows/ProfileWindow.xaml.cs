@@ -3,33 +3,27 @@
  * Date: 2018
  * Project: iChessClient
  * Project description: A local network chess game. 
- * File: ProfilWindowClient.xaml.cs
+ * File: ProfilWindow.xaml.cs
  * File description: The profil user interface.
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace iChessClient
 {
     /// <summary>
-    /// Logique d'interaction pour ProfileWindowClient.xaml
+    /// The profil user interface.
     /// </summary>
-    public partial class ProfileWindowClient : Window
+    public partial class ProfileWindow : Window
     {
         #region Properties
 
+        /// <summary>
+        /// Handles connection with the iChess server.
+        /// </summary>
         public ClientConnection MyConnection { get; set; }
 
         #endregion
@@ -37,16 +31,12 @@ namespace iChessClient
         #region Constructors
 
         /// <summary>
-        /// Constructor of MainMenuClient.
+        /// Constructor of ProfileWindow class.
         /// </summary>
         /// <param name="myConnection">The connection.</param>
-        public ProfileWindowClient(ClientConnection myConnection)
+        public ProfileWindow(ClientConnection myConnection)
         {
             InitializeComponent();
-
-            // Custom icon
-            Uri iconUri = new Uri(@"C:\Users\Administrateur\Documents\T_DIPL\Documentation\Poster\Logo_iChess.png", UriKind.RelativeOrAbsolute);
-            this.Icon = BitmapFrame.Create(iconUri);
 
             this.MyConnection = myConnection;
 
@@ -57,6 +47,9 @@ namespace iChessClient
 
         #region Methods
 
+        /// <summary>
+        /// Updates the user interface.
+        /// </summary>
         public void UpdateView()
         {
             // Recovering client details
@@ -64,7 +57,7 @@ namespace iChessClient
 
             // Header
             this.lblUsername.Content = clientDetails.Username;
-            this.lblEloRating.Content = clientDetails.EloRating.ToString();
+            this.lblEloRating.Content = string.Format("EloRating : {0}", clientDetails.EloRating);
 
             // Stats
             this.lblNbWins.Content = string.Format("Victoires : {0}", clientDetails.NumberOfWins.ToString());
@@ -82,6 +75,9 @@ namespace iChessClient
 
         #region Methods (Events)
 
+        /// <summary>
+        /// Called when imgLogout is pressed and released.
+        /// </summary>
         private void imgLogout_MouseUp(object sender, MouseButtonEventArgs e)
         {
             this.MyConnection.DisconnectFromServer();
@@ -89,19 +85,28 @@ namespace iChessClient
             this.Owner.Owner.Show();
         }
 
+        /// <summary>
+        /// Called when imgBack is pressed and released.
+        /// </summary>
         private void imgBack_MouseUp(object sender, MouseButtonEventArgs e)
         {
             this.Hide();
             this.Owner.Show();
         }
 
+        /// <summary>
+        /// Called when btnModifyProfile is clicked.
+        /// </summary>
         private void btnModifyProfile_Click(object sender, RoutedEventArgs e)
         {
-            ModifyProfileWindowClient modifyProfileWindowClient = new ModifyProfileWindowClient(this.MyConnection);
-            modifyProfileWindowClient.Owner = this;
-            modifyProfileWindowClient.ShowDialog();
+            ModifyProfileWindow modifyProfileWindow = new ModifyProfileWindow(this.MyConnection);
+            modifyProfileWindow.Owner = this;
+            modifyProfileWindow.ShowDialog();
         }
 
+        /// <summary>
+        /// Called when the window is closing.
+        /// </summary>
         private void WindowProfile_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this.MyConnection.DisconnectFromServer();

@@ -8,14 +8,9 @@
  */
 
 using NetworkCommsDotNet;
-using NetworkCommsDotNet.DPSBase;
 using NetworkCommsDotNet.Connections;
 using NetworkCommsDotNet.Connections.TCP;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace iChessClient
 {
@@ -48,6 +43,10 @@ namespace iChessClient
         // ModifyProfile request
         private const string PACKET_TYPE_MODIFYPROFILE_REQUEST = "ModifyProfileRequest";
         private const string PACKET_TYPE_MODIFYPROFILE_REPLY = "ModifyProfileReply";
+
+        // CreateRoom request
+        private const string PACKET_TYPE_CREATEROOM_REQUEST = "CreateRoomRequest";
+        private const string PACKET_TYPE_CREATEROOM_REPLY = "CreateRoomReply";
 
         #endregion
 
@@ -113,10 +112,10 @@ namespace iChessClient
             try
             {
                 // Format credentials
-                string credentials = string.Format("{0}:{1}", username, password); // TODO : use ClientCredentials
+                ClientCredentials credentials = new ClientCredentials(username, password);
 
                 // Send the registration request and wait 5000ms for a reply
-                if (NetworkComms.SendReceiveObject<string, bool>(PACKET_TYPE_REGISTRATION_REQUEST, ipAddress, port, PACKET_TYPE_REGISTRATION_REPLY, DEFAULT_TIMEOUT, credentials))
+                if (NetworkComms.SendReceiveObject<ClientCredentials, bool>(PACKET_TYPE_REGISTRATION_REQUEST, ipAddress, port, PACKET_TYPE_REGISTRATION_REPLY, DEFAULT_TIMEOUT, credentials))
                 {
                     registrationAllowed = 0; // The server has accepted the registration
                 }
@@ -166,10 +165,10 @@ namespace iChessClient
                 }
 
                 // Format credentials
-                string credentials = string.Format("{0}:{1}", username, password); // TODO : use ClientCredentials
+                ClientCredentials credentials = new ClientCredentials(username, password);
 
                 // Send the connection request and wait 5000ms for a reply
-                if (this.MyConnection.SendReceiveObject<string, bool>(PACKET_TYPE_LOGIN_REQUEST, PACKET_TYPE_LOGIN_REPLY, DEFAULT_TIMEOUT, credentials))
+                if (this.MyConnection.SendReceiveObject<ClientCredentials, bool>(PACKET_TYPE_LOGIN_REQUEST, PACKET_TYPE_LOGIN_REPLY, DEFAULT_TIMEOUT, credentials))
                 {
                     connectionResult = 0; // The server has accepted the connection
                 }
@@ -243,7 +242,7 @@ namespace iChessClient
 
             try
             {
-                if (this.MyConnection.SendReceiveObject<ClientCredentials, bool>(PACKET_TYPE_MODIFYPROFILE_REQUEST, PACKET_TYPE_MODIFYPROFILE_REPLY, DEFAULT_TIMEOUT, new ClientCredentials(username, password)))
+                if (this.MyConnection.SendReceiveObject<ClientCredentials, bool>(PACKET_TYPE_MODIFYPROFILE_REQUEST, PACKET_TYPE_MODIFYPROFILE_REPLY, DEFAULT_TIMEOUT, new ClientCredentials(username, password))) // TODO : maybe pass ClientCredentials as this functions parameter
                 {
                     returnValue = 0;
                 }
@@ -251,6 +250,27 @@ namespace iChessClient
                 {
                     returnValue = 1;
                 }
+            }
+            catch (Exception)
+            {
+                returnValue = -1;
+            }
+
+            return returnValue;
+        }
+
+        /// <summary>
+        /// Ask the iChess server to create a gaming room.
+        /// </summary>
+        /// <param name="minutesPerPlayer">The time each player have to play.</param>
+        /// <returns>less than 0 == an error occured, 0 == the server refused, more than 0 == the ID of the created gaming room.</returns>
+        public int CreateRoom(int minutesPerPlayer)
+        {
+            int returnValue = -1;
+            
+            try
+            {
+                returnValue = this.MyConnection.SendReceiveObject<int, int>(PACKET_TYPE_CREATEROOM_REQUEST, PACKET_TYPE_CREATEROOM_REPLY, DEFAULT_TIMEOUT, minutesPerPlayer);
             }
             catch (Exception)
             {

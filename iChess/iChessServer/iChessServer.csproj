@@ -84,7 +84,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="MainWindowServer.xaml">
+    <Page Include="Windows\MainWindowServer.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -92,16 +92,16 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="IObserverWindow.cs" />
-    <Compile Include="MainWindowServer.xaml.cs">
+    <Compile Include="Interfaces\IObserverWindow.cs" />
+    <Compile Include="Windows\MainWindowServer.xaml.cs">
       <DependentUpon>MainWindowServer.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Network\AllClientsDetails.cs" />
-    <Compile Include="Network\ClientCredentials.cs" />
-    <Compile Include="Network\ClientDetails.cs" />
+    <Compile Include="Network\Sendable\AllClientsDetails.cs" />
+    <Compile Include="Network\Sendable\ClientCredentials.cs" />
+    <Compile Include="Network\Sendable\ClientDetails.cs" />
     <Compile Include="Network\ServerConnection.cs" />
     <Compile Include="Network\ServerDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

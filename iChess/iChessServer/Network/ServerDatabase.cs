@@ -9,96 +9,153 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.SQLite;
+using System.Text.RegularExpressions;
 
 namespace iChessServer
 {
     /// <summary>
     /// Handle connections with the SQLite database.
     /// </summary>
-    public static class ServerDatabase
+    public class ServerDatabase
     {
         #region Constants
 
-        private static string DEFAULT_DB_PATH = "ServerDB.db";
-        private static string DEFAULT_DB_VERSION = "3";
+        private string DEFAULT_DB_PATH = "ServerDB.db";
+        private string DEFAULT_DB_VERSION = "3";
+
+        private int DEFAULT_USERNAME_MIN_LENGTH = 3;
+        private int DEFAULT_USERNAME_MAX_LENGTH = 10;
+        private int DEFAULT_PASSWORD_MIN_LENGTH = 3;
+        private int DEFAULT_PASSWORD_MAX_LENGTH = 20;
 
         #endregion
 
-        #region Methods (Database)
+        #region Properties
 
         /// <summary>
-        /// Add a client to the database.
+        /// The connection to the SQLite database.
         /// </summary>
-        /// <param name="username">The username of the client.</param>
-        /// <param name="password">The password of the client.</param>
-        /// <returns>true if the registration is successful, false if not.</returns>
-        public static bool RegisterClient(string username, string password)
+        public SQLiteConnection DBConnection { get; set; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Constructor of ServerDatabase class.
+        /// </summary>
+        public ServerDatabase()
         {
-            bool insertSuccess = false;
 
-            // Connection
-            SQLiteConnection connection = new SQLiteConnection(string.Format("Data Source={0};Version={1};", DEFAULT_DB_PATH, DEFAULT_DB_VERSION));
-            connection.Open();
+        }
 
-            // Querry
-            string sql = string.Format("INSERT INTO Clients(username, password, registrationDate) VALUES('{0}','{1}', '{2}')", username, password, DateTimeOffset.Now.ToUnixTimeSeconds());
-            SQLiteCommand command = new SQLiteCommand(sql, connection);
+        #endregion
+
+        #region Methods (Open & close)
+
+        /// <summary>
+        /// Open the connection with an SQLite database.
+        /// </summary>
+        /// <returns>True == connection is open, false == an error occured.</returns>
+        public bool OpenConnection()
+        {
+            bool connectionResult = false;
+
             try
             {
-                command.ExecuteNonQuery();
-                insertSuccess = true;
+                // Connection
+                this.DBConnection = new SQLiteConnection(string.Format("Data Source={0};Version={1};", DEFAULT_DB_PATH, DEFAULT_DB_VERSION));
+                this.DBConnection.Open();
+                connectionResult = true;
             }
             catch (Exception)
             {
-                insertSuccess = false;
+                connectionResult = false;
             }
 
-            connection.Close();
-
-            return insertSuccess;
+            return connectionResult;
         }
 
         /// <summary>
-        /// Retrieves clients from the database.
+        /// Closes the connection with the SQLite database.
         /// </summary>
-        /// <returns>A list of string containing all client's name.</returns>
-        public static Dictionary<string, string> GetClientsFromDB()
+        public void CloseConnection()
         {
-            Dictionary<string, string> clientsFromDB = new Dictionary<string, string>();
+            this.DBConnection?.Close();
+        }
 
-            // Connection
-            SQLiteConnection connection = new SQLiteConnection(string.Format("Data Source={0};Version={1};", DEFAULT_DB_PATH, DEFAULT_DB_VERSION));
-            connection.Open();
+        #endregion
 
-            // Querry
-            string sql = "select * from Clients";
-            SQLiteCommand command = new SQLiteCommand(sql, connection);
-            SQLiteDataReader reader = command.ExecuteReader();
-            while (reader.Read())
+        #region Methods (Utilities)
+
+        /// <summary>
+        /// Checks if credentials are complying to the server's expectations..
+        /// </summary>
+        /// <param name="credentials">The credentials.</param>
+        /// <returns>True == credentials are complying, false == credentials are NOT complying.</returns>
+        private bool CheckCredentialsCompliance(ClientCredentials credentials)
+        {
+            bool result = false;
+            var regexSpecialChars = new Regex("^[a-zA-Z0-9 ]*$"); // Regex for special chars excluding
+
+            // Username check
+            if (credentials.Username.Length >= DEFAULT_USERNAME_MIN_LENGTH && credentials.Username.Length <= DEFAULT_USERNAME_MAX_LENGTH && regexSpecialChars.IsMatch(credentials.Username))
             {
-                clientsFromDB.Add(reader["username"].ToString(), reader["password"].ToString());
+                // Password check
+                if (credentials.Password.Length >= DEFAULT_PASSWORD_MIN_LENGTH && credentials.Password.Length <= DEFAULT_PASSWORD_MAX_LENGTH)
+                {
+                    result = true;
+                }
             }
 
-            connection.Close();
+            return result;
+        }
+
+        #endregion
+
+        #region Methods (Get)
+
+        /// <summary>
+        /// Retrieves all ClientCredentials from the database.
+        /// </summary>
+        /// <returns>A list of ClientCredentials with every client's usernames and passwords.</returns>
+        public List<ClientCredentials> GetClientsCredentials()
+        {
+            List<ClientCredentials> clientsFromDB = new List<ClientCredentials>();
+
+            try
+            {
+                // Querry
+                string sql = "select * from Clients";
+                SQLiteCommand command = new SQLiteCommand(sql, this.DBConnection);
+                SQLiteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    //clientsFromDB.Add(reader["username"].ToString(), reader["password"].ToString()); // TODO : del this line if ok
+                    clientsFromDB.Add(new ClientCredentials(reader["username"].ToString(), reader["password"].ToString()));
+                }
+            }
+            catch (Exception)
+            {
+                throw new Exception("An error occured. Make sure the connection is open.");
+            }
 
             return clientsFromDB;
         }
 
-        public static ClientDetails GetClientDetails(string username)
+        /// <summary>
+        /// Retrieves ClientDetails from database.
+        /// </summary>
+        /// <param name="username">The username of the client.</param>
+        /// <returns>The ClientDetails of the client.</returns>
+        public ClientDetails GetClientDetails(string username)
         {
             ClientDetails clientDetails = new ClientDetails();
 
-            // Connection
-            SQLiteConnection connection = new SQLiteConnection(string.Format("Data Source={0};Version={1};", DEFAULT_DB_PATH, DEFAULT_DB_VERSION));
-            connection.Open();
-
             // Querry
             string sql = string.Format("select * from Clients where username ='{0}'", username);
-            SQLiteCommand command = new SQLiteCommand(sql, connection);
+            SQLiteCommand command = new SQLiteCommand(sql, this.DBConnection);
             SQLiteDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -112,22 +169,20 @@ namespace iChessServer
                 clientDetails = new ClientDetails(idClient, username, registrationDate, nbWins, nbDefeats, nbTies, eloRating);
             }
 
-            connection.Close();
-
             return clientDetails;
         }
 
-        public static AllClientsDetails GetAllClientsDetails()
+        /// <summary>
+        /// Retrieves AllClientsDetails from database.
+        /// </summary>
+        /// <returns>An instance of AllClientsDetails containing all clients details.</returns>
+        public AllClientsDetails GetAllClientsDetails()
         {
             AllClientsDetails allClientsDetails = new AllClientsDetails();
 
-            // Connection
-            SQLiteConnection connection = new SQLiteConnection(string.Format("Data Source={0};Version={1};", DEFAULT_DB_PATH, DEFAULT_DB_VERSION));
-            connection.Open();
-
             // Querry
             string sql = string.Format("select * from Clients order by eloRating desc");
-            SQLiteCommand command = new SQLiteCommand(sql, connection);
+            SQLiteCommand command = new SQLiteCommand(sql, this.DBConnection);
             SQLiteDataReader reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -142,33 +197,68 @@ namespace iChessServer
                 allClientsDetails.ClientList.Add(new ClientDetails(idClient, username, registrationDate, nbWins, nbDefeats, nbTies, eloRating));
             }
 
-            connection.Close();
-
             return allClientsDetails;
         }
 
-        public static bool ModifyClientProfile(string username, ClientCredentials clientCredentials)
+        #endregion
+
+        #region Methods (Set)
+
+        /// <summary>
+        /// Adds a client to the database.
+        /// </summary>
+        /// <param name="username">The username of the client.</param>
+        /// <param name="password">The password of the client.</param>
+        /// <returns>true if the registration is successful, false if not.</returns>
+        public bool RegisterClient(ClientCredentials credentials)
+        {
+            bool insertSuccess = false;
+            var regexSpecialChars = new Regex("^[a-zA-Z0-9 ]*$"); // Regex for special chars excluding
+
+            if (this.CheckCredentialsCompliance(credentials))
+            {
+                // Querry
+                string sql = string.Format("INSERT INTO Clients(username, password, registrationDate) VALUES('{0}','{1}', '{2}')", credentials.Username, credentials.Password, DateTimeOffset.Now.ToUnixTimeSeconds());
+                SQLiteCommand command = new SQLiteCommand(sql, this.DBConnection);
+                try
+                {
+                    command.ExecuteNonQuery();
+                    insertSuccess = true;
+                }
+                catch (Exception)
+                {
+                    insertSuccess = false;
+                }
+            }
+
+            return insertSuccess;
+        }
+
+        /// <summary>
+        /// Modify client's credentials.
+        /// </summary>
+        /// <param name="username">The username of the client which will be changed.</param>
+        /// <param name="clientCredentials">The new credentials of the client.</param>
+        /// <returns>True == credentials have been modified, false == credentials have NOT been modified.</returns>
+        public bool ModifyClientCredentials(string username, ClientCredentials credentials) // ++ use credentials for both !
         {
             bool modifySuccess = false;
 
-            // Connection
-            SQLiteConnection connection = new SQLiteConnection(string.Format("Data Source={0};Version={1};", DEFAULT_DB_PATH, DEFAULT_DB_VERSION));
-            connection.Open();
-
-            // Querry
-            string sql = string.Format("UPDATE Clients SET username='{0}', password='{1}' WHERE username='{2}';", clientCredentials.Username, clientCredentials.Password, username);
-            SQLiteCommand command = new SQLiteCommand(sql, connection);
-            try
+            if (this.CheckCredentialsCompliance(credentials))
             {
-                command.ExecuteNonQuery();
-                modifySuccess = true;
+                // Querry
+                string sql = string.Format("UPDATE Clients SET username='{0}', password='{1}' WHERE username='{2}';", credentials.Username, credentials.Password, username);
+                SQLiteCommand command = new SQLiteCommand(sql, this.DBConnection);
+                try
+                {
+                    command.ExecuteNonQuery();
+                    modifySuccess = true;
+                }
+                catch (Exception)
+                {
+                    modifySuccess = false;
+                }
             }
-            catch (Exception)
-            {
-                modifySuccess = false;
-            }
-
-            connection.Close();
 
             return modifySuccess;
         }

@@ -3,48 +3,41 @@
  * Date: 2018
  * Project: iChessClient
  * Project description: A local network chess game. 
- * File: MainWindowClient.xaml.cs
+ * File: LoginWindow.xaml.cs
  * File description: The login user interface.
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace iChessClient
 {
     /// <summary>
-    /// Logique d'interaction pour MainWindow.xaml
+    /// The login user interface.
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class LoginWindow : Window
     {
         #region Properties
 
+        /// <summary>
+        /// Handles connection with the iChess server.
+        /// </summary>
         public ClientConnection MyConnection { get; set; }
 
         #endregion
 
         #region Constructors
 
-        public MainWindow()
+        /// <summary>
+        /// Constructor of LoginWindow class.
+        /// </summary>
+        public LoginWindow()
         {
             InitializeComponent();
-
-            // Custom icon
-            Uri iconUri = new Uri(@"C:\Users\Administrateur\Documents\T_DIPL\Documentation\Poster\Logo_iChess.png", UriKind.RelativeOrAbsolute);
-            this.Icon = BitmapFrame.Create(iconUri);
-
+            
             this.MyConnection = new ClientConnection();
         }
 
@@ -52,6 +45,9 @@ namespace iChessClient
         
         #region Methods (Events)
 
+        /// <summary>
+        /// Called when btnConfirm is clicked. Tries to connect to an iChess server.
+        /// </summary>
         private void btnConfirm_Click(object sender, RoutedEventArgs e)
         {
             int connectionState = this.MyConnection.ConnectToServer(tbxIpAddress.Text, Convert.ToInt32(tbxPort.Text), tbxUsername.Text, tbxPassword.Text);
@@ -63,10 +59,10 @@ namespace iChessClient
                     break;
 
                 case 0:
-                    MainMenuClient mainMenu = new MainMenuClient(this.MyConnection);
+                    MainWindow mainMenu = new MainWindow(this.MyConnection);
                     mainMenu.Owner = this;
                     this.Hide();
-                    mainMenu.Show();
+                    mainMenu.Show(); // TODO : Function to open child window!
                     break;
 
                 case 1:
@@ -78,6 +74,9 @@ namespace iChessClient
             }
         }
 
+        /// <summary>
+        /// Called when btnRegistration is clicked. Tries a registration on an iChess server.
+        /// </summary>
         private void btnRegistration_Click(object sender, RoutedEventArgs e)
         {
             Window registerWindow = new RegisterWindow();
@@ -86,6 +85,9 @@ namespace iChessClient
             registerWindow.Show();
         }
 
+        /// <summary>
+        /// Called when btnRegistration is clicked. Quits the application.
+        /// </summary>
         private void btnQuit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

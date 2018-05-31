@@ -3,35 +3,27 @@
  * Date: 2018
  * Project: iChessClient
  * Project description: A local network chess game. 
- * File: MainMenuClient.xaml.cs
+ * File: MainWindow.xaml.cs
  * File description: The main menu user interface.
  */
 
-using NetworkCommsDotNet;
-using NetworkCommsDotNet.Connections;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace iChessClient
 {
     /// <summary>
-    /// Logique d'interaction pour MainMenuClient.xaml
+    /// The main menu user interface.
     /// </summary>
-    public partial class MainMenuClient : Window
+    public partial class MainWindow : Window
     {
         #region Properties
 
+        /// <summary>
+        /// Handles connection with the iChess server.
+        /// </summary>
         public ClientConnection MyConnection { get; set; }
 
         #endregion
@@ -39,16 +31,12 @@ namespace iChessClient
         #region Constructors
 
         /// <summary>
-        /// Constructor of MainMenuClient.
+        /// Constructor of MainWindow class.
         /// </summary>
         /// <param name="myConnection">The connection.</param>
-        public MainMenuClient(ClientConnection myConnection)
+        public MainWindow(ClientConnection myConnection)
         {
             InitializeComponent();
-
-            // Custom icon
-            Uri iconUri = new Uri(@"C:\Users\Administrateur\Documents\T_DIPL\Documentation\Poster\Logo_iChess.png", UriKind.RelativeOrAbsolute);
-            this.Icon = BitmapFrame.Create(iconUri);
 
             this.MyConnection = myConnection;
 
@@ -59,6 +47,9 @@ namespace iChessClient
 
         #region Methods
 
+        /// <summary>
+        /// Updates the user interface.
+        /// </summary>
         public void UpdateView()
         {
             string username = this.MyConnection.Details.Username;
@@ -72,6 +63,9 @@ namespace iChessClient
 
         #region Methods (Events)
 
+        /// <summary>
+        /// Called when imgLogout is clicked and released. Disconnects from server and shows login's window.
+        /// </summary>
         private void imgLogout_MouseUp(object sender, MouseButtonEventArgs e)
         {
             this.MyConnection.DisconnectFromServer();
@@ -79,22 +73,42 @@ namespace iChessClient
             this.Owner.Show();
         }
 
+        /// <summary>
+        /// Called when lblUsername is clicked and released. Shows profile window.
+        /// </summary>
         private void lblUsername_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            ProfileWindowClient profileWindow = new ProfileWindowClient(this.MyConnection);
+            ProfileWindow profileWindow = new ProfileWindow(this.MyConnection);
             profileWindow.Owner = this;
             this.Hide();
             profileWindow.Show();
         }
 
+        /// <summary>
+        /// Called when btnCreateRoom is clicked.
+        /// </summary>
+        private void btnCreateRoom_Click(object sender, RoutedEventArgs e)
+        {
+            CreateRoomWindow createRoomWindow = new CreateRoomWindow(this.MyConnection);
+            createRoomWindow.Owner = this;
+            this.Hide();
+            createRoomWindow.Show();
+        }
+
+        /// <summary>
+        /// Called when btnRanking is clicked. Shows ranking window.
+        /// </summary>
         private void btnRanking_Click(object sender, RoutedEventArgs e)
         {
-            RankingWindowClient rankingWindow = new RankingWindowClient(this.MyConnection);
+            RankingWindow rankingWindow = new RankingWindow(this.MyConnection);
             rankingWindow.Owner = this;
             this.Hide();
             rankingWindow.Show();
         }
 
+        /// <summary>
+        /// Called when the window is closing. Disconnects from the server.
+        /// </summary>
         private void WindowMainMenu_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this.MyConnection.DisconnectFromServer();

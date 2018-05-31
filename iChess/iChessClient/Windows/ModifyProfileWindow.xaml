@@ -1,11 +1,11 @@
-﻿<Window x:Name="WindowModifyProfile" x:Class="iChessClient.ModifyProfileWindowClient"
+﻿<Window x:Name="ModifyProfile" x:Class="iChessClient.ModifyProfileWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iChessClient"
         mc:Ignorable="d"
-        Title="iChess - Modification du profil" Height="268" Width="325.97" Background="#FFE0E0E0" ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
+        Title="iChess - Modification du profil" Height="268" Width="325.97" Background="#FFE0E0E0" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Icon="/iChessClient;component/Pictures/iChess_Logo_Small.png">
     <Grid>
         <TextBox x:Name="tbxUsername" HorizontalAlignment="Left" Height="27" Margin="10,14,0,0" TextWrapping="Wrap" Text="Username4" VerticalAlignment="Top" Width="288" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}" Foreground="#FF2A2A2A"/>
         <TextBox x:Name="tbxPassword" HorizontalAlignment="Left" Height="27" Margin="10,57,0,0" TextWrapping="Wrap" Text="password4" VerticalAlignment="Top" Width="288" TextAlignment="Center" FontSize="18" BorderThickness="0,0,0,1" Background="{x:Null}" Foreground="#FF2A2A2A"/>

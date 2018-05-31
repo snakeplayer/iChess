@@ -9,15 +9,10 @@
 
 using NetworkCommsDotNet;
 using NetworkCommsDotNet.Connections;
-using NetworkCommsDotNet.DPSBase;
 using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace iChessServer
 {
@@ -51,6 +46,10 @@ namespace iChessServer
         private const string PACKET_TYPE_MODIFYPROFILE_REQUEST = "ModifyProfileRequest";
         private const string PACKET_TYPE_MODIFYPROFILE_REPLY = "ModifyProfileReply";
 
+        // CreateRoom request
+        private const string PACKET_TYPE_CREATEROOM_REQUEST = "CreateRoomRequest";
+        private const string PACKET_TYPE_CREATEROOM_REPLY = "CreateRoomReply";
+
         #endregion
 
         #region Fields
@@ -68,13 +67,18 @@ namespace iChessServer
         private List<IObserverWindow> Observers { get; set; }
 
         /// <summary>
+        /// Used to access the SQLite database.
+        /// </summary>
+        private ServerDatabase Database { get; set; }
+
+        /// <summary>
         /// Contains client's usernames and passwords from SQLite database.
         /// </summary>
-        private Dictionary<string, string> DBClients
+        private List<ClientCredentials> DBClients
         {
             get
             {
-                return ServerDatabase.GetClientsFromDB();
+                return this.Database?.GetClientsCredentials();
             }
         }
 
@@ -121,6 +125,7 @@ namespace iChessServer
         {
             // Initialization
             this.Observers = new List<IObserverWindow>();
+            this.Database = new ServerDatabase();
             this.AuthenticatedClients = new Dictionary<Connection, string>();
             this.Logs = string.Empty;
 
@@ -130,10 +135,10 @@ namespace iChessServer
                 NetworkComms.AppendGlobalConnectionCloseHandler(HandleConnectionClosed);
 
                 // Handles registration requests
-                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_REGISTRATION_REQUEST, HandleRegistrationRequested);
+                NetworkComms.AppendGlobalIncomingPacketHandler<ClientCredentials>(PACKET_TYPE_REGISTRATION_REQUEST, HandleRegistrationRequested);
 
                 // Handles login requests
-                NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_LOGIN_REQUEST, HandleLoginRequested);
+                NetworkComms.AppendGlobalIncomingPacketHandler<ClientCredentials>(PACKET_TYPE_LOGIN_REQUEST, HandleLoginRequested);
 
                 // Handles client's details requests
                 NetworkComms.AppendGlobalIncomingPacketHandler<string>(PACKET_TYPE_MYDETAILS_REQUEST, HandleMyDetailsRequested);
@@ -143,6 +148,9 @@ namespace iChessServer
 
                 // Handles profile modifications requests
                 NetworkComms.AppendGlobalIncomingPacketHandler<ClientCredentials>(PACKET_TYPE_MODIFYPROFILE_REQUEST, HandleModifyProfileRequested);
+
+                // Handles gaming room creation requests
+                NetworkComms.AppendGlobalIncomingPacketHandler<int>(PACKET_TYPE_CREATEROOM_REQUEST, HandleCreateRoomRequested);
             }
             catch (Exception e)
             {
@@ -152,7 +160,7 @@ namespace iChessServer
 
         #endregion
 
-        #region Methods (Get)
+        #region Methods (Get data from outside)
 
         /// <summary>
         /// Returns the list of authenticated clients.
@@ -179,32 +187,21 @@ namespace iChessServer
 
         #endregion
 
-        #region Methods (Utilities)
-
-        /// <summary>
-        /// Tests if the incoming connection is from an authenticated client.
-        /// </summary>
-        /// <param name="connection">The incoming connection.</param>
-        /// <returns>true == the connection is from an authenticated client, false == the connection is NOT from an authenticated client.</returns>
-        private bool IsClientAuthenticated(Connection connection)
-        {
-            return this.AuthenticatedClients.ContainsKey(connection);
-        }
-
-        #endregion
-
-        #region Methods (Start and Stop)
+        #region Methods (Start & stop)
 
         /// <summary>
         /// Starts the server.
         /// </summary>
-        /// <returns>True if the server started successfully, false if not.</returns>
+        /// <returns>True == the server started successfully, false == an error occured.</returns>
         public bool StartServer()
         {
             bool hasServerStarted = false;
 
             try
             {
+                // Open the connection with the SQLite database
+                this.Database.OpenConnection();
+
                 // Start listening for incoming connections
                 Connection.StartListening(ConnectionType.TCP, new IPEndPoint(IPAddress.Any, DEFAULT_PORT)); // TODO : use const or CONFIG FILE !!
 
@@ -246,7 +243,52 @@ namespace iChessServer
                 this.AuthenticatedClients.Clear();
             }
 
+            // Closing the connection with the SQLite database
+            this.Database.CloseConnection();
+
             this.NotifyObservers();
+        }
+
+        #endregion
+
+        #region Methods (Utilities)
+
+        /// <summary>
+        /// Checks if credentials are correct.
+        /// </summary>
+        /// <param name="credentials">The credentials.</param>
+        /// <returns>True == they are correct, false == they are NOT correct.</returns>
+        private bool CheckCredentials(ClientCredentials credentials)
+        {
+            bool loginAllowed = false;
+
+            this.DBClients.ToList().ForEach(clientDB => 
+            {
+                if (clientDB.Equals(credentials))
+                    loginAllowed = true;
+            });
+
+            return loginAllowed;
+        }
+
+        /// <summary>
+        /// Checks if the username is already connected.
+        /// </summary>
+        /// <param name="username">The username.</param>
+        /// <returns>True == it is already connected, false == it is NOT already connected.</returns>
+        private bool IsUsernameAlreadyConnected(string username)
+        {
+            return this.AuthenticatedClients.ContainsValue(username);
+        }
+
+        /// <summary>
+        /// Tests if the incoming connection is from an authenticated client.
+        /// </summary>
+        /// <param name="connection">The incoming connection.</param>
+        /// <returns>true == the connection is from an authenticated client, false == the connection is NOT from an authenticated client.</returns>
+        private bool IsClientAuthenticated(Connection connection)
+        {
+            return this.AuthenticatedClients.ContainsKey(connection);
         }
 
         #endregion
@@ -259,14 +301,10 @@ namespace iChessServer
         /// <param name="packetHeader">The packet header.</param>
         /// <param name="connection">The connection.</param>
         /// <param name="credentials">The credentials.</param>
-        private void HandleRegistrationRequested(PacketHeader packetHeader, Connection connection, string credentials)
+        private void HandleRegistrationRequested(PacketHeader packetHeader, Connection connection, ClientCredentials credentials)
         {
-            // Parse the necessary information out of the provided string
-            string username = credentials.Split(':').First();
-            string password = credentials.Split(':').Last();
-
             // Try to register the client
-            bool registrationAccomplished = ServerDatabase.RegisterClient(username, password);
+            bool registrationAccomplished = this.Database.RegisterClient(credentials);
 
             // Send a reply to the client
             connection.SendObject<bool>(PACKET_TYPE_REGISTRATION_REPLY, registrationAccomplished);
@@ -280,29 +318,23 @@ namespace iChessServer
         /// <param name="packetHeader">The packet header.</param>
         /// <param name="connection">The connection.</param>
         /// <param name="credentials">The credentials.</param>
-        private void HandleLoginRequested(PacketHeader packetHeader, Connection connection, string credentials)
+        private void HandleLoginRequested(PacketHeader packetHeader, Connection connection, ClientCredentials credentials)
         {
             lock (this.AuthenticatedClients)
             {
-                // Parse the necessary information out of the provided string
-                string username = credentials.Split(':').First();
-                string password = credentials.Split(':').Last();
-
                 // If the client is already connected, remove it from the AuthenticatedClients dictionnary
-                if (this.AuthenticatedClients.ContainsKey(connection))
+                if (this.IsClientAuthenticated(connection))
                 {
                     this.AuthenticatedClients.Remove(connection);
                 }
 
                 // If the client's account is not already used and if credentials are correct
-                bool loginAllowed = !this.AuthenticatedClients.ContainsValue(username) &&
-                                        (this.DBClients.ContainsKey(username) &&
-                                        this.DBClients[username] == password);
+                bool loginAllowed = !this.IsUsernameAlreadyConnected(credentials.Username) && this.CheckCredentials(credentials);
 
                 if (loginAllowed)
                 {
                     // Add the client to the list
-                    this.AuthenticatedClients.Add(connection, username);
+                    this.AuthenticatedClients.Add(connection, credentials.Username);
 
                     // Add a message to logs
                     this.Logs += string.Format("{0} is now connected !\n", this.AuthenticatedClients[connection]);
@@ -326,7 +358,7 @@ namespace iChessServer
             if (this.IsClientAuthenticated(connection))
             {
                 // ClientDetails recovering from database
-                ClientDetails clientDetails = ServerDatabase.GetClientDetails(this.AuthenticatedClients[connection]);
+                ClientDetails clientDetails = this.Database.GetClientDetails(this.AuthenticatedClients[connection]);
 
                 // Send clientDetails to the client
                 connection.SendObject<ClientDetails>(PACKET_TYPE_MYDETAILS_REPLY, clientDetails);
@@ -346,7 +378,7 @@ namespace iChessServer
             if (this.IsClientAuthenticated(connection))
             {
                 // AllClientsDetails recovering from database
-                AllClientsDetails allClientsDetails = ServerDatabase.GetAllClientsDetails();
+                AllClientsDetails allClientsDetails = this.Database.GetAllClientsDetails();
 
                 // Send allClientsDetails to the client
                 connection.SendObject<AllClientsDetails>(PACKET_TYPE_ALLCLIENTSDETAILS_REPLY, allClientsDetails);
@@ -365,15 +397,15 @@ namespace iChessServer
         {
             if (this.IsClientAuthenticated(connection))
             {
-                if (ServerDatabase.ModifyClientProfile(this.AuthenticatedClients[connection], newClientCredentials))
-                {
-                    connection.SendObject<bool>(PACKET_TYPE_MODIFYPROFILE_REPLY, true);
+                // Modify client's credentials
+                bool clientCredentialsModified = this.Database.ModifyClientCredentials(this.AuthenticatedClients[connection], newClientCredentials);
+
+                // Send a reply to the client
+                connection.SendObject<bool>(PACKET_TYPE_MODIFYPROFILE_REPLY, clientCredentialsModified);
+
+                // Eventually disconnect the client
+                if (clientCredentialsModified)
                     connection.CloseConnection(false); // The client have to reconnect
-                }
-                else
-                {
-                    connection.SendObject<bool>(PACKET_TYPE_MODIFYPROFILE_REPLY, false);
-                }
 
                 this.NotifyObservers();
             }
@@ -400,6 +432,20 @@ namespace iChessServer
             }
 
             this.NotifyObservers();
+        }
+
+        /// <summary>
+        /// Called when a room creation request is made.
+        /// </summary>
+        /// <param name="packetHeader">The header of the packet.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="minutesPerPlayer">The playing time for each players.</param>
+        private void HandleCreateRoomRequested(PacketHeader packetHeader, Connection connection, int minutesPerPlayer)
+        {
+            if (this.IsClientAuthenticated(connection))
+            {
+                // TODO : u no watodo
+            }
         }
 
         #endregion

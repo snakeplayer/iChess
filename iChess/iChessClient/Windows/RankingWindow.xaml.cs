@@ -3,46 +3,42 @@
  * Date: 2018
  * Project: iChessClient
  * Project description: A local network chess game. 
- * File: RankingWindowClient.xaml.cs
+ * File: RankingWindow.xaml.cs
  * File description: The ranking user interface.
  */
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace iChessClient
 {
     /// <summary>
-    /// Logique d'interaction pour RankingWindowClient.xaml
+    /// The ranking user interface.
     /// </summary>
-    public partial class RankingWindowClient : Window
+    public partial class RankingWindow : Window
     {
         #region Properties
 
+        /// <summary>
+        /// Handles connection with the iChess server.
+        /// </summary>
         public ClientConnection MyConnection { get; set; }
 
         #endregion
 
         #region Constructors
 
-        public RankingWindowClient(ClientConnection myConnection)
+        /// <summary>
+        /// Constructor of RankingWindow class.
+        /// </summary>
+        /// <param name="myConnection">The connection.</param>
+        public RankingWindow(ClientConnection myConnection)
         {
             InitializeComponent();
-
-            // Custom icon
-            Uri iconUri = new Uri(@"C:\Users\Administrateur\Documents\T_DIPL\Documentation\Poster\Logo_iChess.png", UriKind.RelativeOrAbsolute);
-            this.Icon = BitmapFrame.Create(iconUri);
 
             this.MyConnection = myConnection;
 
@@ -74,6 +70,9 @@ namespace iChessClient
 
         #region Methods
 
+        /// <summary>
+        /// Updates the user interface.
+        /// </summary>
         public void UpdateView()
         {
             // Recovering client details
@@ -81,21 +80,27 @@ namespace iChessClient
 
             // Header
             this.lblUsername.Content = clientDetails.Username;
-            this.lblEloRating.Content = clientDetails.EloRating.ToString();
+            this.lblEloRating.Content = string.Format("EloRating : {0}", clientDetails.EloRating);
         }
 
         #endregion
 
         #region Methods (Events)
 
+        /// <summary>
+        /// Called when lblUsername is pressed and released.
+        /// </summary>
         private void lblUsername_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            ProfileWindowClient profileWindow = new ProfileWindowClient(this.MyConnection);
+            ProfileWindow profileWindow = new ProfileWindow(this.MyConnection);
             profileWindow.Owner = this;
             this.Hide();
             profileWindow.Show();
         }
 
+        /// <summary>
+        /// Called when imgLogout is pressed and released.
+        /// </summary>
         private void imgLogout_MouseUp(object sender, MouseButtonEventArgs e)
         {
             this.MyConnection.DisconnectFromServer();
@@ -103,12 +108,18 @@ namespace iChessClient
             this.Owner.Owner.Show();
         }
 
+        /// <summary>
+        /// Called when imgBack is pressed and released.
+        /// </summary>
         private void imgBack_MouseUp(object sender, MouseButtonEventArgs e)
         {
             this.Hide();
             this.Owner.Show();
         }
 
+        /// <summary>
+        /// Called when the window is closing.
+        /// </summary>
         private void WindowRanking_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this.MyConnection.DisconnectFromServer();
