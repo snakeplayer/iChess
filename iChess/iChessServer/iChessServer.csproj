@@ -92,7 +92,11 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ChessGame\ChessGameRoom.cs" />
+    <Compile Include="ChessGame\ChessGameRoomList.cs" />
+    <Compile Include="Client\AuthenticatedClients.cs" />
     <Compile Include="Interfaces\IObserverWindow.cs" />
+    <Compile Include="Client\AuthenticatedClient.cs" />
     <Compile Include="Windows\MainWindowServer.xaml.cs">
       <DependentUpon>MainWindowServer.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -130,6 +134,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.108.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.108.0\build\net46\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

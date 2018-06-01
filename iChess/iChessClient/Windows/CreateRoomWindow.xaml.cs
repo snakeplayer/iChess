@@ -155,7 +155,25 @@ namespace iChessClient
         /// </summary>
         private void btnConfirm_Click(object sender, RoutedEventArgs e)
         {
-            // TODO : launch a game !
+            int roomID = this.MyConnection.CreateRoom(Convert.ToInt32(this.sldGameTime.Value));
+
+            if (roomID <= 0)
+            {
+                // TODO : HANDLE ERRORS
+            }
+            else
+            {
+                bool hasJoined = this.MyConnection.JoinRoom(roomID);
+
+                if (hasJoined)
+                {
+                    // TODO : Show joined room interface.
+                }
+                else
+                {
+                    // TODO : HANDLE ERRORS
+                }
+            }
         }
 
         /// <summary>

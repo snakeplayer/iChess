@@ -50,6 +50,10 @@ namespace iChessServer
         private const string PACKET_TYPE_CREATEROOM_REQUEST = "CreateRoomRequest";
         private const string PACKET_TYPE_CREATEROOM_REPLY = "CreateRoomReply";
 
+        // JoinRoom request
+        private const string PACKET_TYPE_JOINROOM_REQUEST = "JoinRoomRequest";
+        private const string PACKET_TYPE_JOINROOM_REPLY = "JoinRoomReply";
+
         #endregion
 
         #region Fields
@@ -83,20 +87,14 @@ namespace iChessServer
         }
 
         /// <summary>
-        /// Contains Connections and usernames of authenticated clients.
+        /// Contains all authenticated clients.
         /// </summary>
-        private Dictionary<Connection, string> AuthenticatedClients
-        {
-            get
-            {
-                return _authenticatedClients;
-            }
-            set
-            {
-                _authenticatedClients = value;
-                this.NotifyObservers();
-            }
-        }
+        private AuthenticatedClients AuthenticatedClients { get; set; }
+
+        /// <summary>
+        /// Contains all chess game rooms.
+        /// </summary>
+        private ChessGameRoomList ChessGameRoomList { get; set; }
 
         /// <summary>
         /// Contains the logs and call NotifyObservers() when the value changes.
@@ -126,7 +124,8 @@ namespace iChessServer
             // Initialization
             this.Observers = new List<IObserverWindow>();
             this.Database = new ServerDatabase();
-            this.AuthenticatedClients = new Dictionary<Connection, string>();
+            this.AuthenticatedClients = new AuthenticatedClients();
+            this.ChessGameRoomList = new ChessGameRoomList();
             this.Logs = string.Empty;
 
             try
@@ -151,6 +150,9 @@ namespace iChessServer
 
                 // Handles gaming room creation requests
                 NetworkComms.AppendGlobalIncomingPacketHandler<int>(PACKET_TYPE_CREATEROOM_REQUEST, HandleCreateRoomRequested);
+
+                // Handles gaming room creation requests
+                NetworkComms.AppendGlobalIncomingPacketHandler<int>(PACKET_TYPE_JOINROOM_REQUEST, HandleJoinRoomRequested);
             }
             catch (Exception e)
             {
@@ -168,12 +170,7 @@ namespace iChessServer
         /// <returns>A list of string conatining authenticated clients.</returns>
         public List<string> GetAuthenticatedClients()
         {
-            List<string> clients = new List<string>();
-            lock (this.AuthenticatedClients)
-            {
-                this.AuthenticatedClients.ToList().ForEach(authClient => clients.Add(authClient.Value));
-            }
-            return clients;
+            return this.AuthenticatedClients.GetUsernameList();
         }
 
         /// <summary>
@@ -262,7 +259,7 @@ namespace iChessServer
         {
             bool loginAllowed = false;
 
-            this.DBClients.ToList().ForEach(clientDB => 
+            this.DBClients.ToList().ForEach(clientDB =>
             {
                 if (clientDB.Equals(credentials))
                     loginAllowed = true;
@@ -278,7 +275,7 @@ namespace iChessServer
         /// <returns>True == it is already connected, false == it is NOT already connected.</returns>
         private bool IsUsernameAlreadyConnected(string username)
         {
-            return this.AuthenticatedClients.ContainsValue(username);
+            return this.AuthenticatedClients.ContainsUsername(username);
         }
 
         /// <summary>
@@ -288,7 +285,7 @@ namespace iChessServer
         /// <returns>true == the connection is from an authenticated client, false == the connection is NOT from an authenticated client.</returns>
         private bool IsClientAuthenticated(Connection connection)
         {
-            return this.AuthenticatedClients.ContainsKey(connection);
+            return this.AuthenticatedClients.ContainsConnection(connection);
         }
 
         #endregion
@@ -325,7 +322,7 @@ namespace iChessServer
                 // If the client is already connected, remove it from the AuthenticatedClients dictionnary
                 if (this.IsClientAuthenticated(connection))
                 {
-                    this.AuthenticatedClients.Remove(connection);
+                    this.AuthenticatedClients.RemoveClient(connection);
                 }
 
                 // If the client's account is not already used and if credentials are correct
@@ -334,10 +331,11 @@ namespace iChessServer
                 if (loginAllowed)
                 {
                     // Add the client to the list
-                    this.AuthenticatedClients.Add(connection, credentials.Username);
+                    this.AuthenticatedClients.AddClient(connection, credentials.Username);
 
                     // Add a message to logs
-                    this.Logs += string.Format("{0} is now connected !\n", this.AuthenticatedClients[connection]);
+                    //this.Logs += string.Format("{0} is now connected !\n", this.AuthenticatedClients[connection]);
+                    this.Logs += string.Format("{0} is now connected !\n", this.AuthenticatedClients.GetUsername(connection));
                 }
 
                 // Send a reply to the client
@@ -358,7 +356,7 @@ namespace iChessServer
             if (this.IsClientAuthenticated(connection))
             {
                 // ClientDetails recovering from database
-                ClientDetails clientDetails = this.Database.GetClientDetails(this.AuthenticatedClients[connection]);
+                ClientDetails clientDetails = this.Database.GetClientDetails(this.AuthenticatedClients.GetUsername(connection));
 
                 // Send clientDetails to the client
                 connection.SendObject<ClientDetails>(PACKET_TYPE_MYDETAILS_REPLY, clientDetails);
@@ -398,7 +396,7 @@ namespace iChessServer
             if (this.IsClientAuthenticated(connection))
             {
                 // Modify client's credentials
-                bool clientCredentialsModified = this.Database.ModifyClientCredentials(this.AuthenticatedClients[connection], newClientCredentials);
+                bool clientCredentialsModified = this.Database.ModifyClientCredentials(this.AuthenticatedClients.GetUsername(connection), newClientCredentials);
 
                 // Send a reply to the client
                 connection.SendObject<bool>(PACKET_TYPE_MODIFYPROFILE_REPLY, clientCredentialsModified);
@@ -410,6 +408,49 @@ namespace iChessServer
                 this.NotifyObservers();
             }
         }
+        
+        /// <summary>
+        /// Called when a room creation request is made.
+        /// </summary>
+        /// <param name="packetHeader">The header of the packet.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="minutesPerPlayer">The playing time for each players.</param>
+        private void HandleCreateRoomRequested(PacketHeader packetHeader, Connection connection, int minutesPerPlayer)
+        {
+            lock (this.ChessGameRoomList)
+            {
+                if (this.IsClientAuthenticated(connection))
+                {
+                    string username = this.AuthenticatedClients.GetUsername(connection);
+                    int roomID = this.ChessGameRoomList.AddGameRoom(username, minutesPerPlayer);
+                    connection.SendObject<int>(PACKET_TYPE_CREATEROOM_REPLY, roomID);
+                    this.Logs += string.Format("New room created.\n Room ID : {0}\n Username : {1}\n", roomID, username);
+                    this.NotifyObservers();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when a join room request is made.
+        /// </summary>
+        /// <param name="packetHeader">The packet header.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="roomID">The room's uniq ID.</param>
+        private void HandleJoinRoomRequested(PacketHeader packetHeader, Connection connection, int roomID)
+        {
+            if (this.IsClientAuthenticated(connection))
+            {
+                string username = this.AuthenticatedClients.GetUsername(connection);
+                bool hasJoined = this.ChessGameRoomList.AddClientToRoom(this.AuthenticatedClients.GetAuthenticatedClientFromConnection(connection), roomID);
+                connection.SendObject<bool>(PACKET_TYPE_JOINROOM_REPLY, hasJoined);
+
+                if (hasJoined)
+                {
+                    this.Logs += string.Format("Room joined.\n Room ID : {0}\n Username : {1}\n", roomID, username);
+                    this.NotifyObservers();
+                }
+            }
+        }
 
         /// <summary>
         /// Called when a connection is closed.
@@ -419,33 +460,20 @@ namespace iChessServer
         {
             lock (this.AuthenticatedClients)
             {
-                if (this.AuthenticatedClients.ContainsKey(connection))
+                if (this.AuthenticatedClients.ContainsConnection(connection))
                 {
                     lock (this.Logs)
                     {
-                        this.Logs += string.Format("{0} disconnected from the server.\n", this.AuthenticatedClients[connection]);
+                        this.Logs += string.Format("{0} disconnected from the server.\n", this.AuthenticatedClients.GetUsername(connection));
                     }
 
                     // Remove the client from the list
-                    this.AuthenticatedClients.Remove(connection);
+                    this.AuthenticatedClients.RemoveClient(connection);
+                    // TODO : remove client from rooms !
                 }
             }
 
             this.NotifyObservers();
-        }
-
-        /// <summary>
-        /// Called when a room creation request is made.
-        /// </summary>
-        /// <param name="packetHeader">The header of the packet.</param>
-        /// <param name="connection">The connection.</param>
-        /// <param name="minutesPerPlayer">The playing time for each players.</param>
-        private void HandleCreateRoomRequested(PacketHeader packetHeader, Connection connection, int minutesPerPlayer)
-        {
-            if (this.IsClientAuthenticated(connection))
-            {
-                // TODO : u no watodo
-            }
         }
 
         #endregion

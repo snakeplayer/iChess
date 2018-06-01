@@ -48,6 +48,10 @@ namespace iChessClient
         private const string PACKET_TYPE_CREATEROOM_REQUEST = "CreateRoomRequest";
         private const string PACKET_TYPE_CREATEROOM_REPLY = "CreateRoomReply";
 
+        // JoinRoom request
+        private const string PACKET_TYPE_JOINROOM_REQUEST = "JoinRoomRequest";
+        private const string PACKET_TYPE_JOINROOM_REPLY = "JoinRoomReply";
+
         #endregion
 
         #region Properties
@@ -275,6 +279,27 @@ namespace iChessClient
             catch (Exception)
             {
                 returnValue = -1;
+            }
+
+            return returnValue;
+        }
+
+        /// <summary>
+        /// Join a game room.
+        /// </summary>
+        /// <param name="roomID">The ID of the room.</param>
+        /// <returns>True == the room is joined, false == an error occured.</returns>
+        public bool JoinRoom(int roomID)
+        {
+            bool returnValue = false;
+
+            try
+            {
+                returnValue = this.MyConnection.SendReceiveObject<int, bool>(PACKET_TYPE_JOINROOM_REQUEST, PACKET_TYPE_JOINROOM_REPLY, DEFAULT_TIMEOUT, roomID);
+            }
+            catch (Exception)
+            {
+                returnValue = false;
             }
 
             return returnValue;
