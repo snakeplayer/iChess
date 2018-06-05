@@ -167,7 +167,11 @@ namespace iChessClient
 
                 if (hasJoined)
                 {
-                    // TODO : Show joined room interface.
+                    JoinedRoomWindow joinedRoomWindow = new JoinedRoomWindow(this.MyConnection, roomID);
+                    joinedRoomWindow.Owner = this;
+                    this.Hide();
+                    joinedRoomWindow.Show();
+                    this.MyConnection.RegisterObserver(joinedRoomWindow);
                 }
                 else
                 {

@@ -54,12 +54,26 @@ namespace iChessServer
         private const string PACKET_TYPE_JOINROOM_REQUEST = "JoinRoomRequest";
         private const string PACKET_TYPE_JOINROOM_REPLY = "JoinRoomReply";
 
+        // LeaveRoom request
+        private const string PACKET_TYPE_LEAVEROOM_REQUEST = "LeaveRoomRequest";
+        private const string PACKET_TYPE_LEAVEROOM_REPLY = "LeaveRoomReply";
+
+        // RoomInfo request
+        private const string PACKET_TYPE_ROOMINFO_REQUEST = "RoomInfoRequest";
+        private const string PACKET_TYPE_ROOMINFO_REPLY = "RoomInfoReply";
+
+        // RoomList request
+        private const string PACKET_TYPE_ROOMLIST_REQUEST = "RoomListRequest";
+        private const string PACKET_TYPE_ROOMLIST_REPLY = "RoomListReply";
+
+        // Game state changed
+        private const string PACKET_TYPE_GAME_STATE_CHANGED = "GameStateChanged";
+
         #endregion
 
         #region Fields
 
         private string _logs;
-        private Dictionary<Connection, string> _authenticatedClients;
 
         #endregion
 
@@ -151,8 +165,17 @@ namespace iChessServer
                 // Handles gaming room creation requests
                 NetworkComms.AppendGlobalIncomingPacketHandler<int>(PACKET_TYPE_CREATEROOM_REQUEST, HandleCreateRoomRequested);
 
-                // Handles gaming room creation requests
+                // Handles gaming room joining requests
                 NetworkComms.AppendGlobalIncomingPacketHandler<int>(PACKET_TYPE_JOINROOM_REQUEST, HandleJoinRoomRequested);
+
+                // Handles gaming room leaving requests
+                NetworkComms.AppendGlobalIncomingPacketHandler<int>(PACKET_TYPE_LEAVEROOM_REQUEST, HandleLeaveRoomRequested);
+
+                // Handles room informations requests
+                NetworkComms.AppendGlobalIncomingPacketHandler<int>(PACKET_TYPE_ROOMINFO_REQUEST, HandleRoomInfoRequested);
+
+                // Handles room list requests
+                NetworkComms.AppendGlobalIncomingPacketHandler<int>(PACKET_TYPE_ROOMLIST_REQUEST, HandleRoomListRequested);
             }
             catch (Exception e)
             {
@@ -286,6 +309,28 @@ namespace iChessServer
         private bool IsClientAuthenticated(Connection connection)
         {
             return this.AuthenticatedClients.ContainsConnection(connection);
+        }
+
+        /// <summary>
+        /// Send the game state to all client of the given room.
+        /// </summary>
+        /// <param name="roomID">The room's ID.</param>
+        private void SendGameStateChangedToClients(int roomID)
+        {
+            ChessGameRoom gameRoom = this.ChessGameRoomList.GetRoomFromID(roomID);
+
+            Connection HostClient = gameRoom.HostClient?.Connection;
+            Connection GuestClient = gameRoom.GuestClient?.Connection;
+
+            if (HostClient != null)
+            {
+                HostClient.SendObject<int>(PACKET_TYPE_GAME_STATE_CHANGED, 1);
+            }
+
+            if (GuestClient != null)
+            {
+                GuestClient.SendObject<int>(PACKET_TYPE_GAME_STATE_CHANGED, 1);
+            }
         }
 
         #endregion
@@ -446,9 +491,62 @@ namespace iChessServer
 
                 if (hasJoined)
                 {
+                    this.SendGameStateChangedToClients(roomID);
                     this.Logs += string.Format("Room joined.\n Room ID : {0}\n Username : {1}\n", roomID, username);
                     this.NotifyObservers();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Called when a leave room request is made.
+        /// </summary>
+        /// <param name="packetHeader">The header of the packet.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="roomID">The room's uniq ID.</param>
+        private void HandleLeaveRoomRequested(PacketHeader packetHeader, Connection connection, int roomID)
+        {
+            if (this.IsClientAuthenticated(connection))
+            {
+                string username = this.AuthenticatedClients.GetUsername(connection);
+                bool hasLeave = this.ChessGameRoomList.RemoveClientFromRoom(this.AuthenticatedClients.GetAuthenticatedClientFromConnection(connection), roomID);
+                connection.SendObject<bool>(PACKET_TYPE_LEAVEROOM_REPLY, hasLeave);
+
+                if (hasLeave)
+                {
+                    this.Logs += string.Format("Room leaved.\n Room ID : {0}\n Username : {1}\n", roomID, username);
+                    this.NotifyObservers();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when a room info request is made.
+        /// </summary>
+        /// <param name="packetHeader">The packet header.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="roomID">The room's uniq ID.</param>
+        private void HandleRoomInfoRequested(PacketHeader packetHeader, Connection connection, int roomID)
+        {
+            if (this.IsClientAuthenticated(connection))
+            {
+                RoomInfo roomInfo = this.ChessGameRoomList.GetRoomInfo(roomID);
+                connection.SendObject<RoomInfo>(PACKET_TYPE_ROOMINFO_REPLY, roomInfo);
+            }
+        }
+
+        /// <summary>
+        /// Called when a room list request is made.
+        /// </summary>
+        /// <param name="packetHeader">The packet header.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="incomingObject"></param>
+        private void HandleRoomListRequested(PacketHeader packetHeader, Connection connection, int incomingObject)
+        {
+            if (this.IsClientAuthenticated(connection))
+            {
+                RoomItemList itemList = this.ChessGameRoomList.GetRoomItemList();
+                connection.SendObject<RoomItemList>(PACKET_TYPE_ROOMLIST_REPLY, itemList);
             }
         }
 
@@ -467,9 +565,9 @@ namespace iChessServer
                         this.Logs += string.Format("{0} disconnected from the server.\n", this.AuthenticatedClients.GetUsername(connection));
                     }
 
-                    // Remove the client from the list
+                    // Remove the client from the two list
+                    this.ChessGameRoomList.RemoveClientFromAllRooms(this.AuthenticatedClients.GetAuthenticatedClientFromConnection(connection));
                     this.AuthenticatedClients.RemoveClient(connection);
-                    // TODO : remove client from rooms !
                 }
             }
 

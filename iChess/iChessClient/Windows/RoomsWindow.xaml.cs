@@ -3,21 +3,30 @@
  * Date: 2018
  * Project: iChessClient
  * Project description: A local network chess game. 
- * File: MainWindow.xaml.cs
- * File description: The main menu user interface.
+ * File: RoomsWindow.xaml.cs
+ * File description: The show rooms user interface.
  */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace iChessClient
 {
     /// <summary>
-    /// The main menu user interface.
+    /// The show rooms user interface.
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class RoomsWindow : Window
     {
         #region Properties
 
@@ -31,14 +40,21 @@ namespace iChessClient
         #region Constructors
 
         /// <summary>
-        /// Constructor of MainWindow class.
+        /// Constructor of RoomWindow class.
         /// </summary>
-        /// <param name="myConnection">The connection.</param>
-        public MainWindow(ClientConnection myConnection)
+        /// <param name="myConnection">The connection./param>
+        public RoomsWindow(ClientConnection myConnection)
         {
             InitializeComponent();
 
             this.MyConnection = myConnection;
+
+            RoomItemList itemList = this.MyConnection.GetRoomList();
+
+            foreach (RoomItem item in itemList.List)
+            {
+                lwRooms.Items.Add(item);
+            }
 
             this.UpdateView();
         }
@@ -64,17 +80,17 @@ namespace iChessClient
         #region Methods (Events)
 
         /// <summary>
-        /// Called when imgLogout is clicked and released. Disconnects from server and shows login's window.
+        /// Called when imgLogout is clicked and released.
         /// </summary>
         private void imgLogout_MouseUp(object sender, MouseButtonEventArgs e)
         {
             this.MyConnection.DisconnectFromServer();
             this.Hide();
-            this.Owner.Show();
+            this.Owner.Owner.Show();
         }
 
         /// <summary>
-        /// Called when lblUsername is clicked and released. Shows profile window.
+        /// Called when lblUsername is clicked and released.
         /// </summary>
         private void lblUsername_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -85,42 +101,43 @@ namespace iChessClient
         }
 
         /// <summary>
-        /// Called when btnShowRoom is pressed.
+        /// Called when imgBack is clicked and released.
         /// </summary>
-        private void btnShowRooms_Click(object sender, RoutedEventArgs e)
+        private void imgBack_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            RoomsWindow roomsWindow = new RoomsWindow(this.MyConnection);
-            roomsWindow.Owner = this;
             this.Hide();
-            roomsWindow.Show();
+            this.Owner.Show();
         }
 
         /// <summary>
-        /// Called when btnCreateRoom is clicked.
+        /// Called when btnJoin is clicked.
         /// </summary>
-        private void btnCreateRoom_Click(object sender, RoutedEventArgs e)
+        private void btnJoin_Click(object sender, RoutedEventArgs e)
         {
-            CreateRoomWindow createRoomWindow = new CreateRoomWindow(this.MyConnection);
-            createRoomWindow.Owner = this;
-            this.Hide();
-            createRoomWindow.Show();
+            if (lwRooms.SelectedIndex > -1)
+            {
+                int roomID = Convert.ToInt32((lwRooms.SelectedItems[0] as RoomItem).RoomID);
+                bool hasJoined = this.MyConnection.JoinRoom(roomID);
+
+                if (hasJoined)
+                {
+                    JoinedRoomWindow joinedRoomWindow = new JoinedRoomWindow(this.MyConnection, roomID);
+                    joinedRoomWindow.Owner = this;
+                    this.Hide();
+                    joinedRoomWindow.Show();
+                    this.MyConnection.RegisterObserver(joinedRoomWindow);
+                }
+                else
+                {
+                    // TODO : HANDLE ERRORS
+                }
+            }
         }
 
         /// <summary>
-        /// Called when btnRanking is clicked. Shows ranking window.
+        /// Called when the window is closing.
         /// </summary>
-        private void btnRanking_Click(object sender, RoutedEventArgs e)
-        {
-            RankingWindow rankingWindow = new RankingWindow(this.MyConnection);
-            rankingWindow.Owner = this;
-            this.Hide();
-            rankingWindow.Show();
-        }
-
-        /// <summary>
-        /// Called when the window is closing. Disconnects from the server.
-        /// </summary>
-        private void WindowMainMenu_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Rooms_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             this.MyConnection.DisconnectFromServer();
             this.Owner.Close();

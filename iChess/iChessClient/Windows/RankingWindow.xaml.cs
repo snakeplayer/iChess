@@ -43,23 +43,10 @@ namespace iChessClient
             this.MyConnection = myConnection;
 
             this.UpdateView();
-
-            //DEBUG
-            /*
-            lstRanking.Add(new RankingItem { Rank = "1", Player = "David", EloRating = "2340", WLRatio = "1.54" });
-            lstRanking.Add(new RankingItem { Rank = "2", Player = "Jean", EloRating = "1210", WLRatio = "2.24" });
-            lstRanking.Add(new RankingItem { Rank = "3", Player = "Paul", EloRating = "1100", WLRatio = "1.24" });
-            lstRanking.Add(new RankingItem { Rank = "3", Player = "Paul", EloRating = "1100", WLRatio = "1.24" });
-            lstRanking.Add(new RankingItem { Rank = "3", Player = "Paul", EloRating = "1100", WLRatio = "1.24" });
-            lstRanking.Add(new RankingItem { Rank = "3", Player = "Paul", EloRating = "1100", WLRatio = "1.24" });
-            lstRanking.Add(new RankingItem { Rank = "3", Player = "Paul", EloRating = "1100", WLRatio = "1.24" });
-            lstRanking.Add(new RankingItem { Rank = "3", Player = "Paul", EloRating = "1100", WLRatio = "1.24" });
-            */
             
             List<RankingItem> lstRanking = new List<RankingItem>();
             AllClientsDetails acd = this.MyConnection.GetAllClientsDetails();
 
-            //acd.ClientList.Sort();
             int i = 1;
             acd.ClientList.ToList().ForEach(c => lstRanking.Add(new RankingItem { Rank = (i++).ToString(), Player = c.Username, EloRating = c.EloRating.ToString(), WLRatio = c.NumberOfDefeats > 0 ? (Math.Round(Convert.ToDouble(c.NumberOfWins) / Convert.ToDouble(c.NumberOfDefeats), 2)).ToString() : "1" }));
 

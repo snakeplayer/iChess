@@ -30,7 +30,7 @@
         <Image x:Name="imgLogout" HorizontalAlignment="Left" Height="45" Margin="439,13,0,0" VerticalAlignment="Top" Width="45" Source="/iChessClient;component/Pictures/Button_Logout.png" RenderTransformOrigin="2.64,-0.12" MouseUp="imgLogout_MouseUp" OpacityMask="Black"/>
         <Button x:Name="btnCreateRoom" Content="Créer un salon" HorizontalAlignment="Left" Margin="0,116,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#99919191" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" Click="btnCreateRoom_Click"/>
         <Button x:Name="btnQuickMatch" Content="Partie rapide" HorizontalAlignment="Left" Margin="0,169,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus"/>
-        <Button x:Name="btnShowRooms" Content="Salons" HorizontalAlignment="Left" Margin="0,63,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" BorderBrush="Black"/>
+        <Button x:Name="btnShowRooms" Content="Salons" HorizontalAlignment="Left" Margin="0,63,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" BorderBrush="Black" Click="btnShowRooms_Click"/>
         <Button x:Name="btnRanking" Content="Classement" HorizontalAlignment="Left" Margin="0,222,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#99919191" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" Click="btnRanking_Click"/>
     </Grid>
     <Window.Resources>

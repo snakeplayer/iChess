@@ -11,6 +11,8 @@ using NetworkCommsDotNet;
 using NetworkCommsDotNet.Connections;
 using NetworkCommsDotNet.Connections.TCP;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace iChessClient
 {
@@ -52,9 +54,29 @@ namespace iChessClient
         private const string PACKET_TYPE_JOINROOM_REQUEST = "JoinRoomRequest";
         private const string PACKET_TYPE_JOINROOM_REPLY = "JoinRoomReply";
 
+        // LeaveRoom request
+        private const string PACKET_TYPE_LEAVEROOM_REQUEST = "LeaveRoomRequest";
+        private const string PACKET_TYPE_LEAVEROOM_REPLY = "LeaveRoomReply";
+
+        // RoomInfo request
+        private const string PACKET_TYPE_ROOMINFO_REQUEST = "RoomInfoRequest";
+        private const string PACKET_TYPE_ROOMINFO_REPLY = "RoomInfoReply";
+
+        // RoomList request
+        private const string PACKET_TYPE_ROOMLIST_REQUEST = "RoomListRequest";
+        private const string PACKET_TYPE_ROOMLIST_REPLY = "RoomListReply";
+
+        // Game state changed
+        private const string PACKET_TYPE_GAME_STATE_CHANGED = "GameStateChanged";
+
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// A list of IObserverWindow, used to call UpdateView() method on attached views.
+        /// </summary>
+        public List<IObserverWindow> Observers { get; set; }
 
         /// <summary>
         /// The connection with the iChess server.
@@ -93,6 +115,7 @@ namespace iChessClient
         /// </summary>
         public ClientConnection()
         {
+            this.Observers = new List<IObserverWindow>();
             this.FirstInitialization = true;
         }
 
@@ -164,6 +187,9 @@ namespace iChessClient
                 // If it's the first connection
                 if (this.FirstInitialization)
                 {
+                    // Handle game state changing
+                    this.MyConnection.AppendIncomingPacketHandler<int>(PACKET_TYPE_GAME_STATE_CHANGED, HandleGameStateChanged);
+
                     // Handle connection shutdown
                     this.MyConnection.AppendShutdownHandler(HandleConnectionClosed);
                 }
@@ -305,9 +331,77 @@ namespace iChessClient
             return returnValue;
         }
 
+        /// <summary>
+        /// Leaves a game room.
+        /// </summary>
+        /// <param name="roomID">The ID of the room.</param>
+        /// <returns>True == the room is leaved, false == an error occured.</returns>
+        public bool LeaveRoom(int roomID)
+        {
+            bool returnValue = false;
+
+            try
+            {
+                returnValue = this.MyConnection.SendReceiveObject<int, bool>(PACKET_TYPE_LEAVEROOM_REQUEST, PACKET_TYPE_LEAVEROOM_REPLY, DEFAULT_TIMEOUT, roomID);
+            }
+            catch (Exception)
+            {
+                returnValue = false;
+            }
+
+            return returnValue;
+        }
+
+        /// <summary>
+        /// Retrieves the room's informations.
+        /// </summary>
+        /// <param name="roomID">The ID of the room.</param>
+        /// <returns>A RoomInfo object reference containing room's informations.</returns>
+        public RoomInfo GetRoomInfo(int roomID)
+        {
+            RoomInfo roomInfo;
+
+            try
+            {
+                roomInfo = this.MyConnection.SendReceiveObject<int, RoomInfo>(PACKET_TYPE_ROOMINFO_REQUEST, PACKET_TYPE_ROOMINFO_REPLY, DEFAULT_TIMEOUT, roomID);
+            }
+            catch (Exception)
+            {
+                roomInfo = null;
+            }
+
+            return roomInfo;
+        }
+
+        /// <summary>
+        /// Retrieves the room list from the server.
+        /// </summary>
+        /// <returns>A RoomItemList object reference containing the list of all server's room.</returns>
+        public RoomItemList GetRoomList()
+        {
+            try
+            {
+                return this.MyConnection.SendReceiveObject<RoomItemList>(PACKET_TYPE_ROOMLIST_REQUEST, PACKET_TYPE_ROOMLIST_REPLY, DEFAULT_TIMEOUT);
+            }
+            catch (Exception)
+            {
+                throw new Exception("An error occured while trying to recover the room list.");
+            }
+        }
+
         #endregion
 
         #region Methods (Handler)
+
+        /// <summary>
+        /// Called when the game room's state has changed.
+        /// </summary>
+        /// <param name="packetHeader">The packet header.</param>
+        /// <param name="connection">The connection.</param>
+        private void HandleGameStateChanged(PacketHeader packetHeader, Connection connection, int incomingObject)
+        {
+            this.NotifyObservers();
+        }
 
         /// <summary>
         /// Called when the connection is lost.
@@ -316,6 +410,41 @@ namespace iChessClient
         private void HandleConnectionClosed(Connection connection)
         {
             this.DisconnectFromServer();
+        }
+
+        #endregion
+
+        #region Methods (Observers)
+
+        /// <summary>
+        /// Add an IObserverWindow to the list.
+        /// </summary>
+        /// <param name="observerWindow">The IObserverWindow to add.</param>
+        public void RegisterObserver(IObserverWindow observerWindow)
+        {
+            this.Observers.Add(observerWindow);
+            //this.NotifyObservers();
+        }
+
+        /// <summary>
+        /// Remove an IObserverWindow from the list.
+        /// </summary>
+        /// <param name="observerWindow">The IObserverWindow to remove.</param>
+        public void UnregisterObserver(IObserverWindow observerWindow)
+        {
+            this.Observers.Add(observerWindow);
+            this.NotifyObservers();
+        }
+
+        /// <summary>
+        /// Notify all registered IObserverWindow.
+        /// </summary>
+        public void NotifyObservers()
+        {
+            lock (this.Observers)
+            {
+                this.Observers.ToList().ForEach(obs => obs.UpdateView());
+            }
         }
 
         #endregion

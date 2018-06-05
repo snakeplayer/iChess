@@ -47,9 +47,39 @@ namespace iChessServer
         /// </summary>
         public AuthenticatedClient GuestClient { get; set; }
 
+        /// <summary>
+        /// Represents the hosts's name.
+        /// </summary>
+        public string HostClientName
+        {
+            get
+            {
+                return this.HostClient == null ? "" : this.HostClient.Username;
+            }
+        }
+
+        /// <summary>
+        /// Represents the guest's name.
+        /// </summary>
+        public string GuestClientName
+        {
+            get
+            {
+                return this.GuestClient == null ? "" : this.GuestClient.Username;
+            }
+        }
+
         #endregion
 
         #region Constructors
+
+        /// <summary>
+        /// Parameterless constructor.
+        /// </summary>
+        public ChessGameRoom()
+        {
+
+        }
 
         /// <summary>
         /// Constructor of ChessGameRoom class.
@@ -65,6 +95,60 @@ namespace iChessServer
 
         #region Methods
 
+        /// <summary>
+        /// Used to know if a client is in the room.
+        /// </summary>
+        /// <param name="authenticatedClient">The client.</param>
+        /// <returns>True == the client is in the room, false == the client is NOT in the room.</returns>
+        public bool IsClientInRoom(AuthenticatedClient authenticatedClient)
+        {
+            bool isInRoom = false;
+            if (this.HostClient == authenticatedClient || this.GuestClient == authenticatedClient)
+            {
+                isInRoom = true;
+            }
+            return isInRoom;
+        }
+
+        /// <summary>
+        /// Gets the RoomItem of this object.
+        /// </summary>
+        /// <returns>The RoomItem of this object.</returns>
+        public RoomItem GetRoomItem()
+        {
+            RoomItem roomItem = new RoomItem();
+            roomItem.RoomID = this.ID.ToString();
+            roomItem.HostPlayerName = this.RoomName;
+            roomItem.MinutesPerPlayer = this.MinutesPerPlayer.ToString();
+            return roomItem;
+        }
+
+        /// <summary>
+        /// Gets a RoomInfo object reference containing room's informations.
+        /// </summary>
+        /// <returns>A RoomInfo object reference containing room's informations.</returns>
+        public RoomInfo GetRoomInfo()
+        {
+            RoomInfo roomInfo = new RoomInfo();
+            roomInfo.HostPlayerName = this.HostClientName;
+            roomInfo.GuestPlayerName = this.GuestClientName;
+
+            roomInfo.HostPlayerSecondsLeft = this.MinutesPerPlayer; // TODO : real values
+            roomInfo.GuestPlayerSecondsLeft = this.MinutesPerPlayer;
+
+            roomInfo.HostPlayerPiecesOut = new List<string>() { "Piece1", "Piece2"};
+            roomInfo.GuestPlayerPiecesOut = new List<string>() { "Piece3", "Piece4" };
+
+            roomInfo.PlayerTurn = true; // TODO : real values
+            roomInfo.ChatMessages = "This is the chat boyz !\n";
+            return roomInfo;
+        }
+
+        /// <summary>
+        /// Adds a client to the room.
+        /// </summary>
+        /// <param name="authenticatedClient">The client.</param>
+        /// <returns>True == the client has been added, false == the client has not been added.</returns>
         public bool JoinRoom(AuthenticatedClient authenticatedClient)
         {
             bool hasJoined = false;
@@ -87,6 +171,51 @@ namespace iChessServer
             }
 
             return hasJoined;
+        }
+
+        /// <summary>
+        /// Removes a client from the room.
+        /// </summary>
+        /// <param name="authenticatedClient">The client.</param>
+        /// <returns>True == the client has been removed, false == the client has not been removed.</returns>
+        public bool LeaveRoom(AuthenticatedClient authenticatedClient)
+        {
+            bool hasBeenRemoved = false;
+
+            if (this.RoomName == authenticatedClient.Username)
+            {
+                if (this.HostClient == authenticatedClient)
+                {
+                    this.HostClient = null;
+                    hasBeenRemoved = true;
+                }
+            }
+            else
+            {
+                if (this.GuestClient == authenticatedClient)
+                {
+                    this.GuestClient = null;
+                    hasBeenRemoved = true;
+                }
+            }
+
+            return hasBeenRemoved;
+        }
+
+        /// <summary>
+        /// Send the game state to all clients
+        /// </summary>
+        public void SendStateToClients()
+        {
+            if (this.HostClient != null)
+            {
+                
+            }
+
+            if (this.GuestClient != null)
+            {
+
+            }
         }
 
         #endregion
