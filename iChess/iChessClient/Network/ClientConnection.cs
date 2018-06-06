@@ -69,6 +69,9 @@ namespace iChessClient
         // Game state changed
         private const string PACKET_TYPE_GAME_STATE_CHANGED = "GameStateChanged";
 
+        // Send command
+        private const string PACKET_TYPE_COMMAND_SENT = "CommandSent";
+
         #endregion
 
         #region Properties
@@ -389,6 +392,15 @@ namespace iChessClient
             }
         }
 
+        /// <summary>
+        /// Send a ChessCommand to the server.
+        /// </summary>
+        /// <param name="command">The ChessCommand.</param>
+        public void SendCommand(ChessCommand command)
+        {
+            this.MyConnection.SendObject<ChessCommand>(PACKET_TYPE_COMMAND_SENT, command);
+        }
+
         #endregion
 
         #region Methods (Handler)
@@ -432,7 +444,7 @@ namespace iChessClient
         /// <param name="observerWindow">The IObserverWindow to remove.</param>
         public void UnregisterObserver(IObserverWindow observerWindow)
         {
-            this.Observers.Add(observerWindow);
+            this.Observers.Remove(observerWindow);
             this.NotifyObservers();
         }
 

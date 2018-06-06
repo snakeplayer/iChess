@@ -69,6 +69,11 @@ namespace iChessServer
             }
         }
 
+        /// <summary>
+        /// True == white (host) can play, false == black (guest) can play.
+        /// </summary>
+        public bool PlayerTurn { get; set; }
+
         #endregion
 
         #region Constructors
@@ -89,6 +94,7 @@ namespace iChessServer
             this.ID = id;
             this.RoomName = roomName;
             this.MinutesPerPlayer = minutesPerPlayer;
+            this.PlayerTurn = true;
         }
 
         #endregion
@@ -136,10 +142,10 @@ namespace iChessServer
             roomInfo.HostPlayerSecondsLeft = this.MinutesPerPlayer; // TODO : real values
             roomInfo.GuestPlayerSecondsLeft = this.MinutesPerPlayer;
 
-            roomInfo.HostPlayerPiecesOut = new List<string>() { "Piece1", "Piece2"};
+            roomInfo.HostPlayerPiecesOut = new List<string>() { "Piece1", "Piece2" };
             roomInfo.GuestPlayerPiecesOut = new List<string>() { "Piece3", "Piece4" };
 
-            roomInfo.PlayerTurn = true; // TODO : real values
+            roomInfo.PlayerTurn = this.PlayerTurn; // TODO : real values
             roomInfo.ChatMessages = "This is the chat boyz !\n";
             return roomInfo;
         }
@@ -170,6 +176,7 @@ namespace iChessServer
                 }
             }
 
+            this.NotifyClients();
             return hasJoined;
         }
 
@@ -199,23 +206,50 @@ namespace iChessServer
                 }
             }
 
+            this.NotifyClients();
             return hasBeenRemoved;
         }
 
         /// <summary>
-        /// Send the game state to all clients
+        /// Executes a ChessCommand.
         /// </summary>
-        public void SendStateToClients()
+        /// <param name="client">The client.</param>
+        /// <param name="command">The ChessCommand.</param>
+        public void ExecuteCommand(AuthenticatedClient client, ChessCommand command)
         {
-            if (this.HostClient != null)
+            bool executionAllowed = false;
+
+            if (this.PlayerTurn)
             {
-                
+                if (this.HostClient == client)
+                {
+                    executionAllowed = true;
+                }
+            }
+            else
+            {
+                if (this.GuestClient == client)
+                {
+                    executionAllowed = true;
+                }
             }
 
-            if (this.GuestClient != null)
+            if (executionAllowed)
             {
-
+                // Do stuff
+                this.PlayerTurn = !this.PlayerTurn;
             }
+            
+            this.NotifyClients();
+        }
+
+        /// <summary>
+        /// Tells to clients that the game state has changed.
+        /// </summary>
+        public void NotifyClients()
+        {
+            this.HostClient?.NotifyClient();
+            this.GuestClient?.NotifyClient();
         }
 
         #endregion

@@ -87,6 +87,7 @@
     </ApplicationDefinition>
     <Compile Include="Interfaces\IObserverWindow.cs" />
     <Compile Include="Items\RankingItem.cs" />
+    <Compile Include="Network\Sendable\ChessCommand.cs" />
     <Compile Include="Network\Sendable\RoomItem.cs" />
     <Compile Include="Network\Sendable\AllClientsDetails.cs" />
     <Compile Include="Network\Sendable\ClientCredentials.cs" />

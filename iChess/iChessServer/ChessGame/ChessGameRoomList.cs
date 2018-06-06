@@ -210,10 +210,14 @@ namespace iChessServer
             }
         }
 
-        public void SendGameStateToClients(int roomID)
+        /// <summary>
+        /// Executes a command in the given room.
+        /// </summary>
+        /// <param name="roomID">The room's ID.</param>
+        public void ExecuteCommandInRoom(AuthenticatedClient client, ChessCommand command)
         {
-            ChessGameRoom gameRoom = this.GetRoomFromID(roomID);
-            gameRoom.SendStateToClients();
+            ChessGameRoom gameRoom = this.GetRoomFromID(command.RoomID);
+            gameRoom.ExecuteCommand(client, command);
         }
 
         #endregion

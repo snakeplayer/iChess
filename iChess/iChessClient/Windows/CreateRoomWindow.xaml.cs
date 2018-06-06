@@ -82,7 +82,7 @@ namespace iChessClient
                 }
                 else
                 {
-                    this.lblTimePerPlayer.Content = string.Format("Minutes par joueur : {0:0}", this.sldGameTime.Value); // TODO : resolve this bug
+                    this.lblTimePerPlayer.Content = string.Format("Minutes par joueur : {0:0}", this.sldGameTime.Value);
                     sldGameTime.IsEnabled = true;
                 }
             }
@@ -159,7 +159,7 @@ namespace iChessClient
 
             if (roomID <= 0)
             {
-                // TODO : HANDLE ERRORS
+                MessageBox.Show("Une erreur s'est produite lors de la création du salon.");
             }
             else
             {
@@ -175,7 +175,7 @@ namespace iChessClient
                 }
                 else
                 {
-                    // TODO : HANDLE ERRORS
+                    MessageBox.Show("Impossible de rejoindre le salon.");
                 }
             }
         }

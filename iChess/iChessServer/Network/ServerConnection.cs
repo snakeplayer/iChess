@@ -69,6 +69,9 @@ namespace iChessServer
         // Game state changed
         private const string PACKET_TYPE_GAME_STATE_CHANGED = "GameStateChanged";
 
+        // Send command
+        private const string PACKET_TYPE_COMMAND_SENT = "CommandSent";
+
         #endregion
 
         #region Fields
@@ -176,6 +179,9 @@ namespace iChessServer
 
                 // Handles room list requests
                 NetworkComms.AppendGlobalIncomingPacketHandler<int>(PACKET_TYPE_ROOMLIST_REQUEST, HandleRoomListRequested);
+
+                // Handles ChessCommands
+                NetworkComms.AppendGlobalIncomingPacketHandler<ChessCommand>(PACKET_TYPE_COMMAND_SENT, HandleChessCommandSent);
             }
             catch (Exception e)
             {
@@ -311,31 +317,9 @@ namespace iChessServer
             return this.AuthenticatedClients.ContainsConnection(connection);
         }
 
-        /// <summary>
-        /// Send the game state to all client of the given room.
-        /// </summary>
-        /// <param name="roomID">The room's ID.</param>
-        private void SendGameStateChangedToClients(int roomID)
-        {
-            ChessGameRoom gameRoom = this.ChessGameRoomList.GetRoomFromID(roomID);
-
-            Connection HostClient = gameRoom.HostClient?.Connection;
-            Connection GuestClient = gameRoom.GuestClient?.Connection;
-
-            if (HostClient != null)
-            {
-                HostClient.SendObject<int>(PACKET_TYPE_GAME_STATE_CHANGED, 1);
-            }
-
-            if (GuestClient != null)
-            {
-                GuestClient.SendObject<int>(PACKET_TYPE_GAME_STATE_CHANGED, 1);
-            }
-        }
-
         #endregion
 
-        #region Methods (Handler)
+        #region Methods (Global handlers)
 
         /// <summary>
         /// Called when a registration request is made.
@@ -453,7 +437,35 @@ namespace iChessServer
                 this.NotifyObservers();
             }
         }
-        
+
+        /// <summary>
+        /// Called when a connection is closed.
+        /// </summary>
+        /// <param name="connection">The connection.</param>
+        private void HandleConnectionClosed(Connection connection)
+        {
+            lock (this.AuthenticatedClients)
+            {
+                if (this.AuthenticatedClients.ContainsConnection(connection))
+                {
+                    lock (this.Logs)
+                    {
+                        this.Logs += string.Format("{0} disconnected from the server.\n", this.AuthenticatedClients.GetUsername(connection));
+                    }
+
+                    // Remove the client from the two list
+                    this.ChessGameRoomList.RemoveClientFromAllRooms(this.AuthenticatedClients.GetAuthenticatedClientFromConnection(connection));
+                    this.AuthenticatedClients.RemoveClient(connection);
+                }
+            }
+
+            this.NotifyObservers();
+        }
+
+        #endregion
+
+        #region Methods (Game rooms handlers)
+
         /// <summary>
         /// Called when a room creation request is made.
         /// </summary>
@@ -491,7 +503,6 @@ namespace iChessServer
 
                 if (hasJoined)
                 {
-                    this.SendGameStateChangedToClients(roomID);
                     this.Logs += string.Format("Room joined.\n Room ID : {0}\n Username : {1}\n", roomID, username);
                     this.NotifyObservers();
                 }
@@ -517,6 +528,21 @@ namespace iChessServer
                     this.Logs += string.Format("Room leaved.\n Room ID : {0}\n Username : {1}\n", roomID, username);
                     this.NotifyObservers();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Called when a ChessCommand is received.
+        /// </summary>
+        /// <param name="packetHeader">The packet header.</param>
+        /// <param name="connection">The connection.</param>
+        /// <param name="command"></param>
+        private void HandleChessCommandSent(PacketHeader packetHeader, Connection connection, ChessCommand command)
+        {
+            if (this.IsClientAuthenticated(connection))
+            {
+                AuthenticatedClient client = this.AuthenticatedClients.GetAuthenticatedClientFromConnection(connection);
+                this.ChessGameRoomList.ExecuteCommandInRoom(client, command);
             }
         }
 
@@ -550,30 +576,6 @@ namespace iChessServer
             }
         }
 
-        /// <summary>
-        /// Called when a connection is closed.
-        /// </summary>
-        /// <param name="connection">The connection.</param>
-        private void HandleConnectionClosed(Connection connection)
-        {
-            lock (this.AuthenticatedClients)
-            {
-                if (this.AuthenticatedClients.ContainsConnection(connection))
-                {
-                    lock (this.Logs)
-                    {
-                        this.Logs += string.Format("{0} disconnected from the server.\n", this.AuthenticatedClients.GetUsername(connection));
-                    }
-
-                    // Remove the client from the two list
-                    this.ChessGameRoomList.RemoveClientFromAllRooms(this.AuthenticatedClients.GetAuthenticatedClientFromConnection(connection));
-                    this.AuthenticatedClients.RemoveClient(connection);
-                }
-            }
-
-            this.NotifyObservers();
-        }
-
         #endregion
 
         #region Methods (Observers)
@@ -594,7 +596,7 @@ namespace iChessServer
         /// <param name="observerWindow">The IObserverWindow to remove.</param>
         public void UnregisterObserver(IObserverWindow observerWindow)
         {
-            this.Observers.Add(observerWindow);
+            this.Observers.Remove(observerWindow);
             this.NotifyObservers();
         }
 

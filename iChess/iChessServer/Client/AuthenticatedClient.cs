@@ -21,6 +21,13 @@ namespace iChessServer
     /// </summary>
     public class AuthenticatedClient
     {
+        #region Constants
+
+        // Game state changed
+        private const string PACKET_TYPE_GAME_STATE_CHANGED = "GameStateChanged";
+
+        #endregion
+
         #region Properties
 
         /// <summary>
@@ -54,6 +61,14 @@ namespace iChessServer
         {
             this.Connection = connection;
             this.Username = username;
+        }
+
+        /// <summary>
+        /// Notify the client that the game state has changed.
+        /// </summary>
+        public void NotifyClient()
+        {
+            this.Connection.SendObject<int>(PACKET_TYPE_GAME_STATE_CHANGED, 1);
         }
 
         #endregion

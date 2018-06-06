@@ -129,7 +129,7 @@ namespace iChessClient
                 }
                 else
                 {
-                    // TODO : HANDLE ERRORS
+                    MessageBox.Show("Impossible de rejoindre le salon.");
                 }
             }
         }

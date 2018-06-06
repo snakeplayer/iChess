@@ -7,6 +7,8 @@
         mc:Ignorable="d"
         Title="iChess - Salon rejoint" Height="639" Width="880.485" WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize" Icon="/iChessClient;component/Pictures/iChess_Logo_Small.png" Closing="JoinedRoom_Closing">
     <Grid Background="#FFE0E0E0">
+        <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="458" Margin="195,117,0,0" Stroke="Black" VerticalAlignment="Top" Width="458"/>
+
         <Image x:Name="imgLogo" HorizontalAlignment="Left" Height="69" Margin="-4,-3,-74,0" VerticalAlignment="Top" Width="372" Source="/iChessClient;component/Pictures/iChess_Logo_Large.png"/>
         <Rectangle Fill="Black" HorizontalAlignment="Left" Height="2" Margin="0,62,0,0" VerticalAlignment="Top" Width="862"/>
         <Label x:Name="lblUsername" Content="Username" HorizontalAlignment="Left" Margin="673,6,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="129" FontSize="20" FontWeight="Bold" Height="35" MouseUp="lblUsername_MouseUp"/>
@@ -22,7 +24,7 @@
         <Label x:Name="lblInfoUsername2" Content="Username22" HorizontalAlignment="Left" Margin="50,159,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="14"/>
         <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="16" Margin="26,165,0,0" Stroke="Black" VerticalAlignment="Top" Width="16"/>
         <Label Content="Au tour des" HorizontalAlignment="Left" Margin="22,191,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="16"/>
-        <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="16" Margin="139,199,0,0" Stroke="Black" VerticalAlignment="Top" Width="16"/>
+        <Rectangle x:Name="rectTurn" Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="16" Margin="139,199,0,0" Stroke="Black" VerticalAlignment="Top" Width="16"/>
         <Rectangle HorizontalAlignment="Left" Height="171" Margin="10,238,0,0" VerticalAlignment="Top" Width="172" Stroke="Black"/>
         <Label x:Name="lblTimePlayer1" Content="00:00" HorizontalAlignment="Left" Margin="56,239,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="24"/>
         <Label x:Name="lblUsernamePlayer1" Content="Username11" HorizontalAlignment="Left" Margin="23,265,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="24"/>
@@ -31,7 +33,7 @@
         <Label x:Name="lblTimePlayer2" Content="00:00" HorizontalAlignment="Left" Margin="56,418,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="24"/>
         <Label x:Name="lblUsernamePlayer2" Content="Username11" HorizontalAlignment="Left" Margin="23,444,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="24"/>
         <ListBox x:Name="lbxPiecesOutPlayer2" HorizontalAlignment="Left" Height="100" Margin="10,488,0,-9" VerticalAlignment="Top" Width="172" BorderBrush="Black"/>
-        <Image HorizontalAlignment="Left" Height="470" Margin="196,118,0,0" VerticalAlignment="Top" Width="470" OpacityMask="#FF230B0B" Source="/iChessClient;component/Pictures/iChess_Logo_Small.png"/>
+        <Image x:Name="imgBoard" HorizontalAlignment="Left" Height="456" Margin="196,118,0,0" VerticalAlignment="Top" Width="456" OpacityMask="#FF230B0B" Source="/iChessClient;component/Pictures/iChess_Logo_Small.png"/>
         <Rectangle HorizontalAlignment="Left" Height="218" Margin="680,118,0,0" VerticalAlignment="Top" Width="172" Stroke="Black"/>
         <Label x:Name="lblCurrentGames" Content="Parties en cours" HorizontalAlignment="Left" Margin="681,120,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="16"/>
         <ListBox x:Name="lbxCurrentGames" HorizontalAlignment="Left" Height="151" Margin="680,153,0,0" VerticalAlignment="Top" Width="172" BorderBrush="Black"/>
@@ -41,6 +43,7 @@
         <Label x:Name="lblDiscussion" Content="Discussion" HorizontalAlignment="Left" Margin="684,373,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="22"/>
         <TextBox x:Name="tbxDiscussion" HorizontalAlignment="Left" Height="154" Margin="681,408,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="170" BorderThickness="0,1"/>
         <TextBox x:Name="tbxMessage" HorizontalAlignment="Left" Height="25" Margin="681,562,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="170" BorderThickness="0,1"/>
+        <Button x:Name="btnAction" Content="DEBUG BUTTON" HorizontalAlignment="Left" Margin="373,13,0,0" VerticalAlignment="Top" Width="172" Height="33" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" BorderBrush="{x:Null}" Click="btnAction_Click"/>
 
     </Grid>
     <Window.Resources>

@@ -97,6 +97,7 @@
     <Compile Include="Client\AuthenticatedClients.cs" />
     <Compile Include="Interfaces\IObserverWindow.cs" />
     <Compile Include="Client\AuthenticatedClient.cs" />
+    <Compile Include="Network\Sendable\ChessCommand.cs" />
     <Compile Include="Network\Sendable\RoomInfo.cs" />
     <Compile Include="Network\Sendable\RoomItem.cs" />
     <Compile Include="Network\Sendable\RoomItemList.cs" />
