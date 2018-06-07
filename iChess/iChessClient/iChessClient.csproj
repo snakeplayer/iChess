@@ -88,10 +88,12 @@
     <Compile Include="Interfaces\IObserverWindow.cs" />
     <Compile Include="Items\RankingItem.cs" />
     <Compile Include="Network\Sendable\ChessCommand.cs" />
+    <Compile Include="Network\Sendable\ChessGameRoom\ChessBoardSerializable.cs" />
+    <Compile Include="Network\Sendable\ChessGameRoom\ChessSquareSerializable.cs" />
     <Compile Include="Network\Sendable\RoomItem.cs" />
     <Compile Include="Network\Sendable\AllClientsDetails.cs" />
     <Compile Include="Network\Sendable\ClientCredentials.cs" />
-    <Compile Include="Network\Sendable\RoomInfo.cs" />
+    <Compile Include="Network\Sendable\ChessGameRoom\RoomInfo.cs" />
     <Compile Include="Network\Sendable\RoomItemList.cs" />
     <Compile Include="Windows\CreateRoomWindow.xaml.cs">
       <DependentUpon>CreateRoomWindow.xaml</DependentUpon>
@@ -193,10 +195,58 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Pictures\Button_Left_Arrow.png" />
-    <Resource Include="Pictures\Button_Logout.png" />
-    <Resource Include="Pictures\iChess_Logo_Large.png" />
-    <Resource Include="Pictures\iChess_Logo_Small.png" />
+    <Resource Include="UI_Pictures\Button_Left_Arrow.png" />
+    <Resource Include="UI_Pictures\Button_Logout.png" />
+    <Resource Include="UI_Pictures\iChess_Logo_Large.png" />
+    <Resource Include="UI_Pictures\iChess_Logo_Small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ChessGame_Pictures\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\SolidChess.sln" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Bishop_Black.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Dawn_Black.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\King_Black.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Knight_Left_Black.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Knight_Right_Black.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Queen_Black.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Rook_Black.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Bishop_White.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Dawn_White.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\King_White.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Knight_Left_White.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Knight_Right_White.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Queen_White.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Rook_White.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.108.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.108.0\build\net46\System.Data.SQLite.Core.targets')" />

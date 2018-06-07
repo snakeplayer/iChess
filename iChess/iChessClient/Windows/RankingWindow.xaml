@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iChessClient"
         mc:Ignorable="d"
-        Title="iChess - Classement" Height="314" Width="507" Background="#FFE0E0E0" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner" Closing="WindowRanking_Closing" Icon="/iChessClient;component/Pictures/iChess_Logo_Small.png">
+        Title="iChess - Classement" Height="314" Width="507" Background="#FFE0E0E0" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner" Closing="WindowRanking_Closing" Icon="/iChessClient;component/UI_Pictures/iChess_Logo_Small.png">
     <Grid>
         <Rectangle HorizontalAlignment="Left" Height="504" Margin="218,-221,0,-12" VerticalAlignment="Top" Width="64" RenderTransformOrigin="0.5,0.5">
             <Rectangle.RenderTransform>
@@ -25,11 +25,11 @@
         </Rectangle>
         <Label x:Name="lblUsername" Content="Username" HorizontalAlignment="Left" Margin="309,6,-144,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="129" FontSize="20" FontWeight="Bold" Height="35" MouseUp="lblUsername_MouseUp"/>
         <Label x:Name="lblEloRating" Content="EloRating : 1500" HorizontalAlignment="Left" Margin="309,33,-144,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="129" FontSize="14" FontWeight="Bold"/>
-        <Image x:Name="imgLogout" HorizontalAlignment="Left" Height="45" Margin="439,13,-190,0" VerticalAlignment="Top" Width="45" Source="/iChessClient;component/Pictures/Button_Logout.png" RenderTransformOrigin="2.64,-0.12" MouseUp="imgLogout_MouseUp" OpacityMask="Black"/>
+        <Image x:Name="imgLogout" HorizontalAlignment="Left" Height="45" Margin="439,13,-190,0" VerticalAlignment="Top" Width="45" Source="/iChessClient;component/UI_Pictures/Button_Logout.png" RenderTransformOrigin="2.64,-0.12" MouseUp="imgLogout_MouseUp" OpacityMask="Black"/>
         <Label Content="Classement" HorizontalAlignment="Left" Margin="32,61,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="24" Height="34" Padding="2"/>
-        <Image x:Name="imgBack" HorizontalAlignment="Left" Height="21" Margin="6,69,0,0" VerticalAlignment="Top" Width="22" Source="/iChessClient;component/Pictures/Button_Left_Arrow.png" MouseUp="imgBack_MouseUp"/>
+        <Image x:Name="imgBack" HorizontalAlignment="Left" Height="21" Margin="6,69,0,0" VerticalAlignment="Top" Width="22" Source="/iChessClient;component/UI_Pictures/Button_Left_Arrow.png" MouseUp="imgBack_MouseUp"/>
         <Rectangle Fill="Black" HorizontalAlignment="Left" Height="2" Margin="0,93,-208,0" VerticalAlignment="Top" Width="502" StrokeThickness="0"/>
-        <Image x:Name="imgLogo" HorizontalAlignment="Left" Height="69" Margin="-4,-3,-74,0" VerticalAlignment="Top" Width="372" Source="/iChessClient;component/Pictures/iChess_Logo_Large.png"/>
+        <Image x:Name="imgLogo" HorizontalAlignment="Left" Height="69" Margin="-4,-3,-74,0" VerticalAlignment="Top" Width="372" Source="/iChessClient;component/UI_Pictures/iChess_Logo_Large.png"/>
         <Label Content="Rang" HorizontalAlignment="Left" Margin="117,-73,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="18" Height="34" Padding="2"/>
         <Rectangle Fill="#FF6E6E6E" HorizontalAlignment="Left" Height="1" Margin="106,-48,-107,0" VerticalAlignment="Top" Width="502" StrokeThickness="0"/>
         <Label Content="Joueur" HorizontalAlignment="Left" Margin="231,-73,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="18" Height="34" Padding="2"/>

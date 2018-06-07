@@ -26,17 +26,17 @@ namespace iChessClient
         public int RoomID { get; set; }
 
         [ProtoMember(2)]
-        public int Number { get; set; }
+        public int[] PositionXY { get; set; }
 
         public ChessCommand()
         {
 
         }
 
-        public ChessCommand(int roomID, int number)
+        public ChessCommand(int roomID, int[] positionXY)
         {
             this.RoomID = roomID;
-            this.Number = number;
+            this.PositionXY = positionXY;
         }
     }
 }

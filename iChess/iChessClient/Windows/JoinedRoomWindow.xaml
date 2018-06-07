@@ -5,17 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iChessClient"
         mc:Ignorable="d"
-        Title="iChess - Salon rejoint" Height="639" Width="880.485" WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize" Icon="/iChessClient;component/Pictures/iChess_Logo_Small.png" Closing="JoinedRoom_Closing">
+        Title="iChess - Salon rejoint" Height="639" Width="880.485" WindowStartupLocation="CenterOwner" ResizeMode="CanMinimize" Icon="/iChessClient;component/UI_Pictures/iChess_Logo_Small.png" Closing="JoinedRoom_Closing">
     <Grid Background="#FFE0E0E0">
         <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="458" Margin="195,117,0,0" Stroke="Black" VerticalAlignment="Top" Width="458"/>
 
-        <Image x:Name="imgLogo" HorizontalAlignment="Left" Height="69" Margin="-4,-3,-74,0" VerticalAlignment="Top" Width="372" Source="/iChessClient;component/Pictures/iChess_Logo_Large.png"/>
+        <Image x:Name="imgLogo" HorizontalAlignment="Left" Height="69" Margin="-4,-3,-74,0" VerticalAlignment="Top" Width="372" Source="/iChessClient;component/UI_Pictures/iChess_Logo_Large.png"/>
         <Rectangle Fill="Black" HorizontalAlignment="Left" Height="2" Margin="0,62,0,0" VerticalAlignment="Top" Width="862"/>
         <Label x:Name="lblUsername" Content="Username" HorizontalAlignment="Left" Margin="673,6,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="129" FontSize="20" FontWeight="Bold" Height="35" MouseUp="lblUsername_MouseUp"/>
         <Label x:Name="lblEloRating" Content="EloRating : 1500" HorizontalAlignment="Left" Margin="673,33,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="129" FontSize="14" FontWeight="Bold"/>
-        <Image x:Name="imgLogout" HorizontalAlignment="Left" Height="45" Margin="803,13,0,0" VerticalAlignment="Top" Width="45" Source="/iChessClient;component/Pictures/Button_Logout.png" RenderTransformOrigin="2.64,-0.12" OpacityMask="Black" MouseUp="imgLogout_MouseUp"/>
+        <Image x:Name="imgLogout" HorizontalAlignment="Left" Height="45" Margin="803,13,0,0" VerticalAlignment="Top" Width="45" Source="/iChessClient;component/UI_Pictures/Button_Logout.png" RenderTransformOrigin="2.64,-0.12" OpacityMask="Black" MouseUp="imgLogout_MouseUp"/>
         <Label Content="Salon rejoint" HorizontalAlignment="Left" Margin="32,61,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="24" Height="34" Padding="2"/>
-        <Image x:Name="imgBack" HorizontalAlignment="Left" Height="21" Margin="6,69,0,0" VerticalAlignment="Top" Width="22" Source="/iChessClient;component/Pictures/Button_Left_Arrow.png" MouseUp="imgBack_MouseUp"/>
+        <Image x:Name="imgBack" HorizontalAlignment="Left" Height="21" Margin="6,69,0,0" VerticalAlignment="Top" Width="22" Source="/iChessClient;component/UI_Pictures/Button_Left_Arrow.png" MouseUp="imgBack_MouseUp"/>
         <Rectangle Fill="Black" HorizontalAlignment="Left" Height="2" Margin="0,93,0,0" VerticalAlignment="Top" Width="862" StrokeThickness="0"/>
         <GroupBox Header="Informations" HorizontalAlignment="Left" Height="133" Margin="10,100,0,0" VerticalAlignment="Top" Width="172" FontFamily="Optimus" FontSize="20" BorderBrush="Black">
             <Rectangle Fill="Black" HorizontalAlignment="Left" Height="16" Margin="10,10,0,0" Stroke="Black" VerticalAlignment="Top" Width="16"/>
@@ -33,7 +33,7 @@
         <Label x:Name="lblTimePlayer2" Content="00:00" HorizontalAlignment="Left" Margin="56,418,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="24"/>
         <Label x:Name="lblUsernamePlayer2" Content="Username11" HorizontalAlignment="Left" Margin="23,444,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="24"/>
         <ListBox x:Name="lbxPiecesOutPlayer2" HorizontalAlignment="Left" Height="100" Margin="10,488,0,-9" VerticalAlignment="Top" Width="172" BorderBrush="Black"/>
-        <Image x:Name="imgBoard" HorizontalAlignment="Left" Height="456" Margin="196,118,0,0" VerticalAlignment="Top" Width="456" OpacityMask="#FF230B0B" Source="/iChessClient;component/Pictures/iChess_Logo_Small.png"/>
+        <Image x:Name="imgBoard" HorizontalAlignment="Left" Height="456" Margin="196,118,0,0" VerticalAlignment="Top" Width="456" OpacityMask="#FF230B0B" Source="/iChessClient;component/UI_Pictures/iChess_Logo_Small.png" MouseUp="imgBoard_MouseUp"/>
         <Rectangle HorizontalAlignment="Left" Height="218" Margin="680,118,0,0" VerticalAlignment="Top" Width="172" Stroke="Black"/>
         <Label x:Name="lblCurrentGames" Content="Parties en cours" HorizontalAlignment="Left" Margin="681,120,0,0" VerticalAlignment="Top" FontFamily="Optimus" FontSize="16"/>
         <ListBox x:Name="lbxCurrentGames" HorizontalAlignment="Left" Height="151" Margin="680,153,0,0" VerticalAlignment="Top" Width="172" BorderBrush="Black"/>

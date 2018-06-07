@@ -92,13 +92,23 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ChessGame\AbstractChessPiece.cs" />
+    <Compile Include="ChessGame\ChessBoard.cs" />
+    <Compile Include="ChessGame\ChessGameModel.cs" />
     <Compile Include="ChessGame\ChessGameRoom.cs" />
     <Compile Include="ChessGame\ChessGameRoomList.cs" />
+    <Compile Include="ChessGame\ChessMove.cs" />
+    <Compile Include="ChessGame\ChessPieces.cs" />
+    <Compile Include="ChessGame\ChessPlayer.cs" />
+    <Compile Include="ChessGame\ChessSquare.cs" />
+    <Compile Include="ChessGame\TempChessBoard.cs" />
     <Compile Include="Client\AuthenticatedClients.cs" />
     <Compile Include="Interfaces\IObserverWindow.cs" />
     <Compile Include="Client\AuthenticatedClient.cs" />
     <Compile Include="Network\Sendable\ChessCommand.cs" />
-    <Compile Include="Network\Sendable\RoomInfo.cs" />
+    <Compile Include="Network\Sendable\ChessGameRoom\ChessBoardSerializable.cs" />
+    <Compile Include="Network\Sendable\ChessGameRoom\ChessSquareSerializable.cs" />
+    <Compile Include="Network\Sendable\ChessGameRoom\RoomInfo.cs" />
     <Compile Include="Network\Sendable\RoomItem.cs" />
     <Compile Include="Network\Sendable\RoomItemList.cs" />
     <Compile Include="Windows\MainWindowServer.xaml.cs">

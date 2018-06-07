@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:iChessClient"
         mc:Ignorable="d"
-        Title="iChess - Menu principal" Height="314" Width="507" UseLayoutRounding="True" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner" Closing="WindowMainMenu_Closing" Icon="/iChessClient;component/Pictures/iChess_Logo_Small.png">
+        Title="iChess - Menu principal" Height="314" Width="507" UseLayoutRounding="True" ResizeMode="CanMinimize" WindowStartupLocation="CenterOwner" Closing="WindowMainMenu_Closing" Icon="/iChessClient;component/UI_Pictures/iChess_Logo_Small.png">
     <Grid Background="#FFE0E0E0">
         <Rectangle HorizontalAlignment="Left" Height="504" Margin="218,-221,0,0" VerticalAlignment="Top" Width="64" RenderTransformOrigin="0.5,0.5">
             <Rectangle.RenderTransform>
@@ -23,11 +23,11 @@
                 </LinearGradientBrush>
             </Rectangle.Fill>
         </Rectangle>
-        <Image x:Name="imgLogo" HorizontalAlignment="Left" Height="69" Margin="-4,-3,-74,0" VerticalAlignment="Top" Width="372" Source="/iChessClient;component/Pictures/iChess_Logo_Large.png"/>
+        <Image x:Name="imgLogo" HorizontalAlignment="Left" Height="69" Margin="-4,-3,-74,0" VerticalAlignment="Top" Width="372" Source="/iChessClient;component/UI_Pictures/iChess_Logo_Large.png"/>
         <Rectangle Fill="Black" HorizontalAlignment="Left" Height="2" Margin="0,62,-1,0" VerticalAlignment="Top" Width="502"/>
         <Label x:Name="lblUsername" Content="Username" HorizontalAlignment="Left" Margin="309,6,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="129" FontSize="20" FontWeight="Bold" Height="35" MouseUp="lblUsername_MouseUp"/>
         <Label x:Name="lblEloRating" Content="EloRating : 1500" HorizontalAlignment="Left" Margin="309,33,0,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" Width="129" FontSize="14" FontWeight="Bold"/>
-        <Image x:Name="imgLogout" HorizontalAlignment="Left" Height="45" Margin="439,13,0,0" VerticalAlignment="Top" Width="45" Source="/iChessClient;component/Pictures/Button_Logout.png" RenderTransformOrigin="2.64,-0.12" MouseUp="imgLogout_MouseUp" OpacityMask="Black"/>
+        <Image x:Name="imgLogout" HorizontalAlignment="Left" Height="45" Margin="439,13,0,0" VerticalAlignment="Top" Width="45" Source="/iChessClient;component/UI_Pictures/Button_Logout.png" RenderTransformOrigin="2.64,-0.12" MouseUp="imgLogout_MouseUp" OpacityMask="Black"/>
         <Button x:Name="btnCreateRoom" Content="Créer un salon" HorizontalAlignment="Left" Margin="0,116,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#99919191" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" Click="btnCreateRoom_Click"/>
         <Button x:Name="btnQuickMatch" Content="Partie rapide" HorizontalAlignment="Left" Margin="0,169,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus"/>
         <Button x:Name="btnShowRooms" Content="Salons" HorizontalAlignment="Left" Margin="0,63,0,0" VerticalAlignment="Top" Width="491" Height="53" FontSize="22" Background="#BF0DA017" BorderThickness="0,1,0,0" Foreground="#FF1D1D1D" FontFamily="Optimus" BorderBrush="Black" Click="btnShowRooms_Click"/>

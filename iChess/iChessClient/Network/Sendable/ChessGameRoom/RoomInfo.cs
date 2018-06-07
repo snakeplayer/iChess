@@ -1,7 +1,7 @@
 ﻿/*
  * Author: Benoit CHAUCHE
  * Date: 2018
- * Project: iChessServer
+ * Project: iChessClient
  * Project description: A local network chess game. 
  * File: RoomInfo.cs
  * File description: Wrapper for room's informations recovering.
@@ -14,7 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace iChessServer
+namespace iChessClient
 {
     /// <summary>
     /// Wrapper for room's informations recovering.
@@ -48,5 +48,8 @@ namespace iChessServer
 
         [ProtoMember(8)]
         public string ChatMessages { get; set; }
+
+        [ProtoMember(9)]
+        public ChessBoardSerializable ChessBoard { get; set; }
     }
 }

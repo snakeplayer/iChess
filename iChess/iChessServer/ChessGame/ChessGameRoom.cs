@@ -23,6 +23,11 @@ namespace iChessServer
         #region Properties
 
         /// <summary>
+        /// The chess game itself.
+        /// </summary>
+        public ChessGameModel Model { get; set; }
+
+        /// <summary>
         /// Represents the uniq ID of the chess game room.
         /// </summary>
         public int ID { get; set; }
@@ -70,9 +75,14 @@ namespace iChessServer
         }
 
         /// <summary>
-        /// True == white (host) can play, false == black (guest) can play.
+        /// True == black (host) can play, false == white (guest) can play.
         /// </summary>
-        public bool PlayerTurn { get; set; }
+        public bool PlayerTurn {
+            get
+            {
+                return this.Model.PlayerTurn;
+            }
+        }
 
         #endregion
 
@@ -91,10 +101,11 @@ namespace iChessServer
         /// </summary>
         public ChessGameRoom(int id, string roomName, int minutesPerPlayer)
         {
+            this.Model = new ChessGameModel("", "", minutesPerPlayer * 60);
+
             this.ID = id;
             this.RoomName = roomName;
             this.MinutesPerPlayer = minutesPerPlayer;
-            this.PlayerTurn = true;
         }
 
         #endregion
@@ -147,6 +158,20 @@ namespace iChessServer
 
             roomInfo.PlayerTurn = this.PlayerTurn; // TODO : real values
             roomInfo.ChatMessages = "This is the chat boyz !\n";
+
+            // --------------------- ChessBoard & ChessSquare ---------------------------------------------------
+            /*ChessSquareSerializable[] chessSquares = new ChessSquareSerializable[64]; // TODO : no magic values
+
+            for (int i = 0; i < 64; i++)
+            {
+                chessSquares[i] = new ChessSquareSerializable();
+            }
+
+            chessSquares[0].ChessPiece = "Dawn_White";
+            chessSquares[2].ChessPiece = "Dawn_White";*/
+
+            roomInfo.ChessBoard = this.Model.GetChessBoardSerializable();
+
             return roomInfo;
         }
 
@@ -237,9 +262,9 @@ namespace iChessServer
             if (executionAllowed)
             {
                 // Do stuff
-                this.PlayerTurn = !this.PlayerTurn;
+                this.Model.ExecuteCommand(command);
             }
-            
+
             this.NotifyClients();
         }
 
